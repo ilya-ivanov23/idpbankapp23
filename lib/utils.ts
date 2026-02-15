@@ -2,7 +2,7 @@
 import { type ClassValue, clsx } from "clsx";
 import qs from "query-string";
 import { twMerge } from "tailwind-merge";
-import {z} from "zod";
+import { z } from "zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -39,23 +39,23 @@ export const formatDateTime = (dateString: Date) => {
   };
 
   const formattedDateTime: string = new Date(dateString).toLocaleString(
-    "en-US",
-    dateTimeOptions
+      "en-US",
+      dateTimeOptions
   );
 
   const formattedDateDay: string = new Date(dateString).toLocaleString(
-    "en-US",
-    dateDayOptions
+      "en-US",
+      dateDayOptions
   );
 
   const formattedDate: string = new Date(dateString).toLocaleString(
-    "en-US",
-    dateOptions
+      "en-US",
+      dateOptions
   );
 
   const formattedTime: string = new Date(dateString).toLocaleString(
-    "en-US",
-    timeOptions
+      "en-US",
+      timeOptions
   );
 
   return {
@@ -94,11 +94,11 @@ export function formUrlQuery({ params, key, value }: UrlQueryParams) {
   currentUrl[key] = value;
 
   return qs.stringifyUrl(
-    {
-      url: window.location.pathname,
-      query: currentUrl,
-    },
-    { skipNull: true }
+      {
+        url: window.location.pathname,
+        query: currentUrl,
+      },
+      { skipNull: true }
   );
 }
 
@@ -131,36 +131,36 @@ export function getAccountTypeColors(type: AccountTypes) {
 }
 
 export function countTransactionCategories(
-  transactions: Transaction[]
+    transactions: Transaction[]
 ): CategoryCount[] {
   const categoryCounts: { [category: string]: number } = {};
   let totalCount = 0;
 
   // Iterate over each transaction
   transactions &&
-    transactions.forEach((transaction) => {
-      // Extract the category from the transaction
-      const category = transaction.category;
+  transactions.forEach((transaction) => {
+    // Extract the category from the transaction
+    const category = transaction.category;
 
-      // If the category exists in the categoryCounts object, increment its count
-      if (categoryCounts.hasOwnProperty(category)) {
-        categoryCounts[category]++;
-      } else {
-        // Otherwise, initialize the count to 1
-        categoryCounts[category] = 1;
-      }
+    // If the category exists in the categoryCounts object, increment its count
+    if (categoryCounts.hasOwnProperty(category)) {
+      categoryCounts[category]++;
+    } else {
+      // Otherwise, initialize the count to 1
+      categoryCounts[category] = 1;
+    }
 
-      // Increment total count
-      totalCount++;
-    });
+    // Increment total count
+    totalCount++;
+  });
 
   // Convert the categoryCounts object to an array of objects
   const aggregatedCategories: CategoryCount[] = Object.keys(categoryCounts).map(
-    (category) => ({
-      name: category,
-      count: categoryCounts[category],
-      totalCount,
-    })
+      (category) => ({
+        name: category,
+        count: categoryCounts[category],
+        totalCount,
+      })
   );
 
   // Sort the aggregatedCategories array by count in descending order
@@ -196,14 +196,14 @@ export const getTransactionStatus = (date: Date) => {
 };
 
 export const authFormSchema = (type: string) => z.object({
- // sign-up
+  // sign up
   firstName: type === 'sign-in' ? z.string().optional() : z.string().min(3),
   lastName: type === 'sign-in' ? z.string().optional() : z.string().min(3),
   address1: type === 'sign-in' ? z.string().optional() : z.string().max(50),
   city: type === 'sign-in' ? z.string().optional() : z.string().max(50),
-  country: type === 'sign-in' ? z.string().optional() : z.string().min(2).max(23),
+  state: type === 'sign-in' ? z.string().optional() : z.string().min(2).max(2),
   postalCode: type === 'sign-in' ? z.string().optional() : z.string().min(3).max(6),
-  DateOfBirth: type === 'sign-in' ? z.string().optional() : z.string().min(3),
+  dateOfBirth: type === 'sign-in' ? z.string().optional() : z.string().min(3),
   ssn: type === 'sign-in' ? z.string().optional() : z.string().min(3),
   // both
   email: z.string().email(),

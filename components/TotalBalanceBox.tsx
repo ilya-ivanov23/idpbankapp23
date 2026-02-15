@@ -1,10 +1,19 @@
+"use client";
+
 import React from 'react'
 import AnimatedCounter from "@/components/AnimatedCounter";
 import DoughnutChart from "@/components/DoughnutChart";
+import { useBalance } from './BalanceProvider';
 
 const TotalBalanceBox = ({
     accounts = [], totalBanks, totalCurrentBalance
-                         }: TotlaBalanceBoxProps) => {
+                         }: TotalBalanceBoxProps) => {
+    const { source } = useBalance();
+
+    const totalManualBalance = accounts.reduce((total, account) => {
+        return total + (account.manualBalance ?? account.currentBalance);
+    }, 0);
+
     return (
         <section className="total-balance">
             <div className="total-balance-chart">
@@ -17,12 +26,11 @@ const TotalBalanceBox = ({
                 </h2>
                 <div className="flex flex-col gap-2">
                     <p className="total-balance-label">
-                        Total Current Balance
+                        {source === 'plaid' ? 'Total Current Balance' : 'Total Appwrite Balance'}
                     </p>
 
                     <div className="total-balance-amount flex-center gap-2">
-                        <AnimatedCounter amount={totalCurrentBalance} />
-
+                        <AnimatedCounter amount={source === 'plaid' ? totalCurrentBalance : totalManualBalance} />
                     </div>
                 </div>
             </div>
