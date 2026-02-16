@@ -1,0 +1,71 @@
+name: IDPBank CI/CD Pipeline
+
+# КОГДА запускать:
+on:
+  push:
+    branches: ["main", "develop"] # При пуше в эти ветки
+  pull_request:
+    branches: ["main", "develop"] # При создании PR
+
+# ЧТО делать (Jobs):
+jobs:
+  quality-check:
+    name: 🏗️ Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Скачать код репозитория
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Установить Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      # 3. Установить зависимости
+      - name: Install Dependencies
+        run: npm ci # ci - это "clean install", быстрее и надежнее для CI
+
+      # 4. Проверка кода линтером (поиск ошибок синтаксиса)
+      - name: Run Linter
+        run: npm run lint
+
+      # 5. Запуск тестов (Unit & Component)
+      - name: Run Tests
+        run: npm run test
+
+      # 6. Сборка проекта (Build)
+      # ВАЖНО: Билд упадет без ключей Appwrite/Plaid.
+      # Мы передаем их через Secrets (настроим ниже).
+      - name: Build Project
+        run: npm run build
+        env:
+          # Next
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+
+          # Appwrite Public Config
+          NEXT_PUBLIC_APPWRITE_ENDPOINT: ${{ secrets.NEXT_PUBLIC_APPWRITE_ENDPOINT }}
+          NEXT_PUBLIC_APPWRITE_PROJECT: ${{ secrets.NEXT_PUBLIC_APPWRITE_PROJECT }}
+          NEXT_APPWRITE_KEY: ${{ secrets.NEXT_APPWRITE_KEY }}
+
+          # Appwrite Database & Collections (Обычно нужны при сборке)
+          APPWRITE_DATABASE_ID: ${{ secrets.APPWRITE_DATABASE_ID }}
+          APPWRITE_USER_COLLECTION_ID: ${{ secrets.APPWRITE_USER_COLLECTION_ID }}
+          APPWRITE_BANK_COLLECTION_ID: ${{ secrets.APPWRITE_BANK_COLLECTION_ID }}
+          APPWRITE_TRANSACTION_COLLECTION_ID: ${{ secrets.APPWRITE_TRANSACTION_COLLECTION_ID }}
+
+          # Приватные ключи (нужны, если build запускает серверные функции или тесты)
+          PLAID_CLIENT_ID: ${{ secrets.PLAID_CLIENT_ID }}
+          PLAID_SECRET: ${{ secrets.PLAID_SECRET }}
+          PLAID_ENV: sandbox
+          PLAID_PRODUCTS: ${{ secrets.PLAID_PRODUCTS }}
+          PLAID_COUNTRY_CODES: ${{ secrets.PLAID_COUNTRY_CODES }}
+
+          # Dwolla
+          DWOLLA_KEY: ${{ secrets.DWOLLA_KEY }}
+          DWOLLA_SECRET: ${{ secrets.DWOLLA_SECRET }}
+          DWOLLA_ENV: sandbox
+          DWOLLA_BASE_URL: ${{ secrets.DWOLLA_WEBHOOK_URL }}
