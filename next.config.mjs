@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    output: "standalone",
+
+
     typescript: {
         ignoreBuildErrors: true
     },
@@ -7,3 +10,5 @@ const nextConfig = {
         ignoreDuringBuilds: true
     }
 };
+
+export default nextConfig;
