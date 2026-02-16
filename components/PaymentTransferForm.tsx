@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -49,6 +49,8 @@ const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
         },
     });
 
+    const [isSuccess, setIsSuccess] = useState(false);
+
     const submit = async (data: z.infer<typeof formSchema>) => {
         setIsLoading(true);
 
@@ -91,8 +93,9 @@ const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
             const transfer = await createTransfer(transferParams);
 
             if (transfer) {
+                setIsSuccess(true);
                 form.reset();
-                router.push("/");
+                setTimeout(() => router.push("/"), 3000);
             }
         } catch (error) {
             console.error("Submitting create transfer request failed: ", error);
@@ -100,6 +103,16 @@ const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
 
         setIsLoading(false);
     };
+
+    if (isSuccess) {
+        return (
+            <div className="flex flex-col items-center justify-center p-10 bg-green-50 dark:bg-green-950 dark:border-green-800 rounded-lg border border-green-200 shadow-sm">
+                <CheckCircle className="text-green-600 dark:text-green-400  w-14 h-14 sm:w-16 sm:h-16 mb-4" />
+                <h2 className="text-20 sm:text-24 font-bold text-green-800 dark:text-green-400 mb-2">Transfer Funds Successful</h2>
+                <p className="text-16 text-green-700 dark:text-green-300">Redirecting to dashboard...</p>
+            </div>
+        )
+    }
 
     return (
         <Form {...form}>

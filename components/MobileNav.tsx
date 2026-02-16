@@ -15,13 +15,17 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import Footer from "@/components/Footer";
+import { useBalance } from './BalanceProvider';
+import PlaidLink from "@/components/PlaidLink";
+import { ModeToggle } from "@/components/ModeToggle";
 
 
 const MobileNav = ({ user }: MobileNavProps) => {
     const pathname = usePathname();
+       const { source, toggleSource } = useBalance();
 
     return (
-        <section className="w-fulll max-w-[264px]">
+        <section className="w-fit">
             <Sheet>
                 <SheetTrigger>
                     <Image
@@ -29,10 +33,12 @@ const MobileNav = ({ user }: MobileNavProps) => {
                         width={30}
                         height={30}
                         alt="menu"
-                        className="cursor-pointer"
+                        className="cursor-pointer dark:invert"
                     />
                 </SheetTrigger>
-                <SheetContent side="left" className="border-none bg-white">
+                <SheetContent side="left" className="border-none bg-white dark:bg-background pt-4">
+                    <SheetTitle className="sr-only">Mobile Navigation</SheetTitle>
+                    <SheetDescription className="sr-only">Navigate the banking application</SheetDescription>
                     <Link href="/" className="cursor-pointer flex items-center gap-1 px-4">
                         <Image
                             src="/icons/logo.svg"
@@ -43,7 +49,6 @@ const MobileNav = ({ user }: MobileNavProps) => {
                         <h1 className="text-26 font-ibm-plex-serif font-bold text-black-1">IDPBank</h1>
                     </Link>
                     <div className="mobilenav-sheet">
-                        <SheetClose asChild>
                             <nav className="flex h-full flex-col gap-6 pt-16 text-white">
                                 {sidebarLinks.map((item) => {
                                     const isActive = pathname === item.route || pathname.startsWith(`${item.route}/`)
@@ -70,11 +75,25 @@ const MobileNav = ({ user }: MobileNavProps) => {
                                     )
                                 })}
 
-
+                                <div className="ml-5">
+                                    <PlaidLink user={user} />
+                                </div>
                             </nav>
-                        </SheetClose>
 
                         <Footer user={user} type="mobile" />
+
+                        <div className="flex flex-row  items-center justify-center py-2 gap-1 cursor-pointer" onClick={toggleSource}>
+                            <div className={`size-2.5 rounded-full ${source === 'plaid' ? 'bg-green-500' : 'bg-red-500'}`} />
+                            <span className="text-[15px] font-semibold text-gray-600">
+                                {source === 'plaid' ? 'Plaid Mode' : 'Appwrite Mode'}
+                            </span>
+                        </div>
+                        
+                        <div>
+                             <ModeToggle />
+
+                        </div>
+                       
                     </div>
                 </SheetContent>
             </Sheet>

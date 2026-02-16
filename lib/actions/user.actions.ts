@@ -105,7 +105,9 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
     }
 }
 
-export async function getLoggedInUser() {
+import { cache } from 'react';
+
+export const getLoggedInUser = cache(async () => {
     try {
         const { account } = await createSessionClient();
         const result = await account.get();
@@ -117,7 +119,7 @@ export async function getLoggedInUser() {
         console.log(error)
         return null;
     }
-}
+});
 
 export const logoutAccount = async () => {
     try {

@@ -18,8 +18,8 @@ const Copy = ({ title }: { title: string }) => {
     return (
         <Button
             data-state="closed"
-            className="mt-3 flex max-w-[320px] gap-4"
-            variant="secondary"
+            className="mt-3 flex max-w-[320px] gap-4 text-black-2 hover:bg-transparent"
+            variant="ghost"
             onClick={copyToClipboard}
         >
             <p className="line-clamp-1 w-full max-w-full text-xs font-medium text-black-2">
@@ -34,9 +34,9 @@ const Copy = ({ title }: { title: string }) => {
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     className="mr-2 size-4"
                 >
                     <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
@@ -50,10 +50,10 @@ const Copy = ({ title }: { title: string }) => {
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    className="mr-2 size-4"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mr-2 size-4 text-green-500"
                 >
                     <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>

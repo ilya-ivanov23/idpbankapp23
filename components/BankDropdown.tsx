@@ -20,6 +20,7 @@ export const BankDropdown = ({
                                  accounts = [],
                                  setValue,
                                  otherStyles,
+                                 id,
                              }: BankDropdownProps) => {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -48,7 +49,8 @@ export const BankDropdown = ({
             onValueChange={(value) => handleBankChange(value)}
         >
             <SelectTrigger
-                className={`flex w-full bg-white gap-3 md:w-[300px] ${otherStyles}`}
+                id={id}
+                className={`flex w-full bg-white dark:bg-background gap-3 md:w-[300px] ${otherStyles}`}
             >
                 <Image
                     src="icons/credit-card.svg"
@@ -56,10 +58,16 @@ export const BankDropdown = ({
                     height={20}
                     alt="account"
                 />
-                <p className="line-clamp-1 w-full text-left">{selected.name}</p>
+                <p className="line-clamp-1 w-full text-left">
+                    {selected.name} ({formatAmount(
+                        source === 'plaid' 
+                            ? selected.currentBalance 
+                            : (selected.manualBalance !== undefined ? selected.manualBalance : selected.currentBalance)
+                    )})
+                </p>
             </SelectTrigger>
             <SelectContent
-                className={`w-full bg-white md:w-[300px] ${otherStyles}`}
+                className={`w-full bg-white dark:bg-popover md:w-[300px] ${otherStyles}`}
                 align="end"
             >
                 <SelectGroup>

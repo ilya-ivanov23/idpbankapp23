@@ -19,25 +19,25 @@ const BankCard = ({ account, userName, showBalance = true }: CreditCardProps) =>
             <Link href={`/transaction-history/?id=${account.appwriteItemId}`} className="bank-card">
                 <div className="bank-card_content">
                     <div>
-                        <h1 className="text-16 font-semibold text-white">
-                            {userName}
+                        <h1 className="text-14 font-bold text-white pb-0.5 sm:text-16 capitalize">
+                            {account.subtype}
                         </h1>
-                        <p className="font-ibm-plex-serif font-black text-white">
+                        <p className="font-ibm-plex-serif font-black text-white text-12 sm:text-16">
                             {formatAmount(balance)}
                         </p>
                     </div>
 
                     <article className="flex flex-col gap-2">
                         <div className="flex justify-between">
-                            <h1 className="text-12 font-semibold text-white">
+                            <h1 className="text-12 font-semibold text-white sm:text-12">
                                 {userName}
                             </h1>
-                            <h2 className="text-12 font-semibold text-white">
+                            <h2 className="text-10 font-semibold text-white sm:text-12">
                                 ●● / ●●
                             </h2>
                         </div>
-                        <p className="text-14 font-semibold tracking-[1.1px] text-white">
-                            ●●●● ●●●● ●●●● <span className="text-16">{account.mask}</span>
+                        <p className="text-10 font-semibold tracking-[1.1px] text-white sm:text-14">
+                            ●●●● ●●●● ●●●● <span className="text-12 sm:text-14">{account.mask}</span>
                         </p>
                     </article>
                 </div>
@@ -61,9 +61,9 @@ const BankCard = ({ account, userName, showBalance = true }: CreditCardProps) =>
                 <Image
                     src="/icons/lines.png"
                     width={316}
-                    height={190}
+                    height={250}
                     alt="lines"
-                    className="absolute top-0 left-0"
+                    className="absolute bottom-3 left-0 h-[130%]"
                 />
             </Link>
 

@@ -23,7 +23,40 @@ const config = {
         fill: {
           1: "rgba(255, 255, 255, 0.10)",
         },
-        bankGradient: "#0179FE",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        border: "var(--gray-200)", /* Use gray-200 variable */
+        input: "var(--gray-300)", /* Use gray-300 variable */
+        ring: "var(--bank-gradient)", 
+        primary: {
+          DEFAULT: "var(--bank-gradient)",
+          foreground: "#FFFFFF",
+        },
+        secondary: {
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
+        },
+        destructive: {
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground)",
+        },
+        muted: {
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
+        },
+        popover: {
+          DEFAULT: "var(--card)", /* Reuse card color (Surface) */
+          foreground: "var(--foreground)",
+        },
+        card: {
+          DEFAULT: "var(--card)",
+          foreground: "var(--foreground)",
+        },
+        bankGradient: "var(--bank-gradient)",
         indigo: {
           500: "#6172F3",
           700: "#3538CD",
@@ -56,21 +89,21 @@ const config = {
           1: "#F3F9FF",
         },
         black: {
-          1: "#00214F",
-          2: "#344054",
+          1: "var(--black-1)",
+          2: "var(--black-2)",
         },
         gray: {
-          25: "#FCFCFD",
-          200: "#EAECF0",
-          300: "#D0D5DD",
-          500: "#667085",
-          600: "#475467",
-          700: "#344054",
-          900: "#101828",
+          25: "var(--gray-25)",
+          200: "var(--gray-200)",
+          300: "var(--gray-300)",
+          500: "var(--gray-500)",
+          600: "var(--gray-600)",
+          700: "var(--gray-700)",
+          900: "var(--gray-900)",
         },
       },
       backgroundImage: {
-        "bank-gradient": "linear-gradient(90deg, #0179FE 0%, #4893FF 100%)",
+        "bank-gradient": "linear-gradient(90deg, var(--bank-gradient) 0%, var(--bank-gradient) 100%)",
         "gradient-mesh": "url('/icons/gradient-mesh.svg')",
         "bank-green-gradient":
           "linear-gradient(90deg, #01797A 0%, #489399 100%)",

@@ -183,7 +183,7 @@ declare interface PaginationProps {
 
 declare interface PlaidLinkProps {
   user: User;
-  variant?: "primary" | "ghost";
+  variant?: "primary" | "ghost" | "mini";
   dwollaCustomerId?: string;
 }
 
@@ -204,6 +204,7 @@ declare interface BankDropdownProps {
   accounts: Account[];
   setValue?: UseFormSetValue<any>;
   otherStyles?: string;
+  id?: string;
 }
 
 declare interface BankTabItemProps {

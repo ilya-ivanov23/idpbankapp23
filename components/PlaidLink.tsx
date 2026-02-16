@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from './ui/button'
 import { PlaidLinkOnSuccess, PlaidLinkOptions, usePlaidLink } from 'react-plaid-link'
@@ -55,6 +57,18 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
                         height={24}
                     />
                     <p className='hiddenl text-[16px] font-semibold text-black-2 xl:block'>Connect bank</p>
+                </Button>
+            ): variant === 'mini' ? (
+                <Button onClick={() => open()} className="flex gap-2 bg-transparent p-0 hover:bg-transparent shadow-none">
+                    <Image
+                        src="/icons/plus.svg"
+                        width={20}
+                        height={20}
+                        alt="plus"
+                    />
+                    <h2 className="text-14 font-semibold text-gray-600">
+                        Add Bank
+                    </h2>
                 </Button>
             ): (
                 <Button onClick={() => open()} className="plaidlink-default">

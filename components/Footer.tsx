@@ -5,11 +5,11 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 
-import { useBalance } from './BalanceProvider';
+
 
 const Footer = ({ user, type = 'desktop' }: FooterProps) => {
     const router = useRouter();
-    const { source, toggleSource } = useBalance();
+  
 
     const handleLogOut = async () => {
         const loggedOut = await logoutAccount();
@@ -19,8 +19,8 @@ const Footer = ({ user, type = 'desktop' }: FooterProps) => {
 
     return (
         <footer className="footer">
-            <div className={type === 'mobile' ? 'footer_name-mobile' : 'footer_name'}>
-                <p className="text-xl font-bold text-gray-700">
+            <div className={type === 'mobile' ? 'footer_name-mobile' : 'footer_name custom-footer-name'}>
+                <p className="text-xl font-bold text-gray-700 dark:text-gray-700 bg-gray-200  rounded-full w-full h-full flex items-center justify-center">
                     {user?.firstName[0]}
                 </p>
             </div>
@@ -34,12 +34,7 @@ const Footer = ({ user, type = 'desktop' }: FooterProps) => {
                 </p>
             </div>
 
-            <div className="flex flex-col items-center gap-1 cursor-pointer" onClick={toggleSource}>
-                <div className={`size-2 rounded-full ${source === 'plaid' ? 'bg-green-500' : 'bg-red-500'}`} />
-                <span className="text-[10px] font-semibold text-gray-600">
-                    {source === 'plaid' ? 'Plaid' : 'Appwrite'}
-                </span>
-            </div>
+       
 
             <div className="footer_image" onClick={handleLogOut}>
                 <Image src="icons/logout.svg" fill alt="jsm" />

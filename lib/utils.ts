@@ -106,26 +106,26 @@ export function getAccountTypeColors(type: AccountTypes) {
   switch (type) {
     case "depository":
       return {
-        bg: "bg-blue-25",
-        lightBg: "bg-blue-100",
-        title: "text-blue-900",
-        subText: "text-blue-700",
+        bg: "bg-blue-25 dark:bg-blue-950",
+        lightBg: "bg-blue-100 dark:bg-blue-900",
+        title: "text-blue-900 dark:text-blue-100",
+        subText: "text-blue-700 dark:text-blue-300",
       };
 
     case "credit":
       return {
-        bg: "bg-success-25",
-        lightBg: "bg-success-100",
-        title: "text-success-900",
-        subText: "text-success-700",
+        bg: "bg-success-25 dark:bg-green-950",
+        lightBg: "bg-success-100 dark:bg-green-900",
+        title: "text-success-900 dark:text-green-100",
+        subText: "text-success-700 dark:text-green-300",
       };
 
     default:
       return {
-        bg: "bg-green-25",
-        lightBg: "bg-green-100",
-        title: "text-green-900",
-        subText: "text-green-700",
+        bg: "bg-green-25 dark:bg-green-950",
+        lightBg: "bg-green-100 dark:bg-green-900",
+        title: "text-green-900 dark:text-green-100",
+        subText: "text-green-700 dark:text-green-300",
       };
   }
 }
@@ -140,7 +140,7 @@ export function countTransactionCategories(
   transactions &&
   transactions.forEach((transaction) => {
     // Extract the category from the transaction
-    const category = transaction.category;
+    const category = transaction.category || "Others";
 
     // If the category exists in the categoryCounts object, increment its count
     if (categoryCounts.hasOwnProperty(category)) {

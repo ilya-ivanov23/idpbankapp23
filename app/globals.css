@@ -2,6 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Original Light Theme */
+  --background: #FFFFFF;
+  --foreground: #344054;
+  --sidebar-background: #FFFFFF;
+  --sidebar-foreground: #00214F;
+  --bank-gradient: #0179FE;
+  --black-1: #00214F;
+  --black-2: #344054;
+  --gray-25: #FCFCFD;
+  --gray-200: #EAECF0;
+  --gray-300: #D0D5DD;
+  --gray-500: #667085;
+  --gray-600: #475467;
+  --gray-700: #344054;
+  --gray-900: #101828;
+  --card: #FFFFFF;
+  --accent: #0179FE;
+  --accent-foreground: #FFFFFF;
+  --secondary: #344054;
+  --secondary-foreground: #FFFFFF;
+  --destructive: #FF4444;
+  --destructive-foreground: #FFFFFF;
+  --muted: transparent;
+  --muted-foreground: #64748B;
+}
+
+.dark {
+  /* Coursera Dark Theme */
+  --background: #18191C; /* Deep Grey-Blue */
+  --foreground: #D1D7DD; /* Secondary Text */
+  --sidebar-background: #27282B; /* Surface */
+  --sidebar-foreground: #FFFFFF; /* Primary Text */
+  --bank-gradient: #4483FD; /* Electric Blue */
+  --black-1: #FFFFFF;
+  --black-2: #D1D7DD;
+  --gray-25: #18191C;
+  --gray-200: #3E3F42; /* Borders */
+  --gray-300: #3E3F42; /* Borders/Inputs */
+  --gray-500: #98A1B1; /* Muted/Placeholders */
+  --gray-600: #98A1B1; /* Muted */
+  --gray-700: #D1D7DD; /* Secondary */
+  --gray-900: #FFFFFF; /* Primary Headers */
+  --card: #27282B;
+  --accent: #4483FD;
+  --accent-foreground: #18191C;
+  --secondary: #D1D7DD;
+  --secondary-foreground: #18191C;
+  --destructive: #FF5F5F;
+  --destructive-foreground: #FFFFFF;
+  --muted: transparent;
+  --muted-foreground: #98A1B1;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -106,7 +160,7 @@
 
   /* Home */
   .home {
-    @apply no-scrollbar flex w-full flex-row max-xl:max-h-screen max-xl:overflow-y-scroll;
+    @apply no-scrollbar flex w-full flex-row max-xl:max-h-screen max-xl:overflow-y-scroll bg-[var(--background)] dark:bg-[var(--background)];
   }
 
   .home-content {
@@ -162,6 +216,10 @@
     @apply h-[120px] w-full bg-gradient-mesh bg-cover bg-no-repeat;
   }
 
+  .profile-banner-mobile {
+    @apply h-[120px] w-full bg-gradient-mesh bg-cover bg-no-repeat;
+  }
+
   .profile {
     @apply relative flex px-6 max-xl:justify-center;
   }
@@ -175,11 +233,11 @@
   }
 
   .profile-name {
-    @apply text-24 font-semibold text-gray-900;
+    @apply text-24 font-bold text-blue-900 dark:text-blue-100;
   }
 
   .profile-email {
-    @apply text-16 font-normal text-gray-600;
+    @apply text-16 font-normal text-blue-700 dark:text-gray-700;
   }
 
   .banks {
@@ -188,12 +246,13 @@
 
   /* My Banks */
   .my-banks {
-    @apply flex h-screen max-h-screen w-full flex-col gap-8 bg-gray-25 p-8 xl:py-12;
+    @apply flex h-screen max-h-screen w-full flex-col gap-8 bg-[var(--gray-25)] p-8 xl:py-12;
   }
 
   /* My Banks */
+  /* My Banks */
   .transactions {
-    @apply flex max-h-screen w-full flex-col gap-8 overflow-y-scroll bg-gray-25 p-8 xl:py-12;
+    @apply flex max-h-screen w-full flex-col gap-8 overflow-y-scroll bg-[var(--gray-25)] p-8 xl:py-12;
   }
 
   .transactions-header {
@@ -222,7 +281,7 @@
 
   /* Bank Card */
   .bank-card {
-    @apply relative flex h-[190px] w-full max-w-[320px] justify-between rounded-[20px] border border-white bg-bank-gradient shadow-creditCard backdrop-blur-[6px];
+    @apply relative max-w-[290px] flex h-[150px] sm:h-[190px] sm:w-full sm:max-w-[320px] justify-between rounded-[20px] border border-white bg-bank-gradient shadow-creditCard backdrop-blur-[6px] overflow-hidden;
   }
 
   .bank-card_content {
@@ -253,12 +312,12 @@
   }
 
   .mobilenav-sheet_close {
-    @apply flex gap-3 items-center p-4 rounded-lg w-full max-w-60;
+    @apply flex gap-3 items-center p-4 ml-5  rounded-lg w-full max-w-60;
   }
 
   /* PlaidLink */
   .plaidlink-primary {
-    @apply text-16 rounded-lg border border-bankGradient bg-bank-gradient font-semibold text-white shadow-form;
+    @apply  text-16 rounded-xl border border-bankGradient bg-bank-gradient font-semibold text-white shadow-form;
   }
 
   .plaidlink-ghost {
@@ -340,7 +399,7 @@
   }
 
   .footer_name {
-    @apply flex size-10 items-center justify-center rounded-full bg-gray-200 max-xl:hidden;
+    @apply flex size-10 items-center justify-center rounded-full bg-gray-200 max-xl:hidden text-[var(--black-2)];
   }
 
   .footer_email {
@@ -348,7 +407,7 @@
   }
 
   .footer_name-mobile {
-    @apply flex size-10 items-center justify-center rounded-full bg-gray-200;
+    @apply flex size-10 items-center justify-center ml-5 p-3 rounded-full bg-gray-200;
   }
 
   .footer_email-mobile {
@@ -356,16 +415,16 @@
   }
 
   .footer_image {
-    @apply relative size-5 max-xl:w-full max-xl:flex max-xl:justify-center max-xl:items-center;
+    @apply relative ml-12 size-5 max-xl:w-full max-xl:flex max-xl:justify-center max-xl:items-center;
   }
 
   /* Sidebar */
   .sidebar {
-    @apply sticky left-0 top-0 flex h-screen w-fit flex-col  justify-between border-r border-gray-200 bg-white pt-8 text-white max-md:hidden sm:p-4 xl:p-6 2xl:w-[355px];
+    @apply sticky dark:bg-[#18191C] left-0 top-0 flex h-screen w-fit flex-col  justify-between border-r border-gray-200 bg-[var(--sidebar-background)] pt-8 text-white max-md:hidden sm:p-4 xl:p-6 2xl:w-[355px];
   }
 
   .sidebar-logo {
-    @apply 2xl:text-26 font-ibm-plex-serif text-[26px] font-bold text-black-1 max-xl:hidden;
+    @apply 2xl:text-26 font-ibm-plex-serif text-[26px] font-bold text-[var(--sidebar-foreground)] max-xl:hidden;
   }
 
   .sidebar-link {
@@ -373,6 +432,6 @@
   }
 
   .sidebar-label {
-    @apply text-16 font-semibold text-black-2 max-xl:hidden;
+    @apply text-16 font-semibold text-[var(--sidebar-foreground)] max-xl:hidden;
   }
 }

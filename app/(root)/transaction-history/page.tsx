@@ -5,6 +5,7 @@ import { getAccount, getAccounts } from '@/lib/actions/bank.actions';
 import { getLoggedInUser } from '@/lib/actions/user.actions';
 import { formatAmount } from '@/lib/utils';
 import React from 'react'
+import TransactionBalance from '@/components/TransactionBalance';
 
 const TransactionHistory = async ({ searchParams: { id, page } }: SearchParamProps) => {
     const currentPage = Number(page as string) || 1;
@@ -53,7 +54,7 @@ const TransactionHistory = async ({ searchParams: { id, page } }: SearchParamPro
 
                     <div className='transactions-account-balance'>
                         <p className="text-14">Current balance</p>
-                        <p className="text-24 text-center font-bold">{formatAmount(account?.data.currentBalance)}</p>
+                        <TransactionBalance account={account?.data} />
                     </div>
                 </div>
 
