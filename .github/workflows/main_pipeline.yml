@@ -66,5 +66,5 @@ jobs:
                   # Dwolla
                     DWOLLA_KEY=${{ secrets.DWOLLA_KEY }}
                     DWOLLA_SECRET=${{ secrets.DWOLLA_SECRET }}
-                    DWOLLA_ENV: sandbox
+                    DWOLLA_ENV=sandbox
                     DWOLLA_BASE_URL=${{ secrets.DWOLLA_WEBHOOK_URL }}
