@@ -3,9 +3,9 @@ name: IDPBank CI/CD Pipeline
 # КОГДА запускать:
 on:
   push:
-    branches: ["main", "develop"] # При пуше в эти ветки
+    branches: [ "main", "dev", "develop" ]
   pull_request:
-    branches: ["main", "develop"] # При создании PR
+    branches: [ "main", "dev", "develop" ]
 
 # ЧТО делать (Jobs):
 jobs:
