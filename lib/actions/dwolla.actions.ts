@@ -63,6 +63,20 @@ const updateBankBalance = async (bankId: string, amountChange: number) => {
     }
 };
 
+// Get existing funding sources for a customer (used when DuplicateResource occurs)
+const getExistingFundingSource = async (customerId: string): Promise<string | null> => {
+    try {
+        const res = await dwollaClient.get(`customers/${customerId}/funding-sources`);
+        const sources = res.body._embedded?.["funding-sources"] ?? [];
+        // Return the first non-balance funding source URL
+        const source = sources.find((s: any) => s.type !== 'balance' && s.status !== 'removed');
+        return source ? source._links.self.href : null;
+    } catch (err) {
+        console.error("Getting existing funding sources failed:", err);
+        return null;
+    }
+};
+
 // Create a Dwolla Funding Source using a Plaid Processor Token
 export const createFundingSource = async (
     options: CreateFundingSourceOptions
@@ -74,7 +88,13 @@ export const createFundingSource = async (
                 plaidToken: options.plaidToken,
             })
             .then((res) => res.headers.get("location"));
-    } catch (err) {
+    } catch (err: any) {
+        // If the funding source already exists, return the existing one's URL
+        const isDuplicate = err?.body?.code === 'DuplicateResource';
+        if (isDuplicate) {
+            console.warn("[Dwolla] DuplicateResource — returning existing funding source URL");
+            return await getExistingFundingSource(options.customerId);
+        }
         console.error("Creating a Funding Source Failed: ", err);
     }
 };

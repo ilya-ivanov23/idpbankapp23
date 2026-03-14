@@ -222,17 +222,38 @@ export const exchangePublicToken = async ({
         });
 
         // If the funding source URL is not created, throw an error
-        if (!fundingSourceUrl) throw Error;
+        if (!fundingSourceUrl) throw new Error("Failed to get funding source URL from Dwolla");
 
-        // Create a bank account using the user ID, item ID, account ID, access token, funding source URL, and shareableId ID
-        await createBankAccount({
-            userId: user.$id,
-            bankId: itemId,
-            accountId: accountData.account_id,
-            accessToken,
-            fundingSourceUrl,
-            shareableId: encryptId(accountData.account_id),
-        });
+        // Check if a bank with this bankId (Plaid item_id) already exists in Appwrite
+        const { database } = await createAdminClient();
+        const existingBanks = await database.listDocuments(
+            process.env.APPWRITE_DATABASE_ID!,
+            process.env.APPWRITE_BANK_COLLECTION_ID!,
+            [Query.equal('bankId', [itemId])]
+        );
+
+        if (existingBanks.total > 0) {
+            // Bank already exists — update the accessToken with the new one
+            const existingBank = existingBanks.documents[0];
+            await database.updateDocument(
+                process.env.APPWRITE_DATABASE_ID!,
+                process.env.APPWRITE_BANK_COLLECTION_ID!,
+                existingBank.$id,
+                { accessToken, fundingSourceUrl }
+            );
+            console.log("[Plaid] Updated existing bank record with new accessToken:", existingBank.$id);
+        } else {
+            // New bank — create it
+            await createBankAccount({
+                userId: user.$id,
+                bankId: itemId,
+                accountId: accountData.account_id,
+                accessToken,
+                fundingSourceUrl,
+                shareableId: encryptId(accountData.account_id),
+            });
+            console.log("[Plaid] Created new bank record for user:", user.$id);
+        }
 
         // Revalidate the path to reflect the changes
         revalidatePath("/");
@@ -245,6 +266,7 @@ export const exchangePublicToken = async ({
         console.error("An error occurred while creating exchanging token:", error);
     }
 }
+
 
 export const getBanks = async ({ userId }: getBanksProps) => {
     try {
