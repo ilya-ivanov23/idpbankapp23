@@ -21,46 +21,70 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
         // get banks from db
         const banks = await getBanks({ userId });
 
-        const accounts = await Promise.all(
+        const accountsRaw = await Promise.all(
             banks?.map(async (bank: Bank) => {
-                // get each account info from plaid
-                const accountsResponse = await plaidClient.accountsGet({
-                    access_token: bank.accessToken,
-                });
-                const accountData = accountsResponse.data.accounts[0];
+                try {
+                    // get each account info from plaid
+                    const accountsResponse = await plaidClient.accountsGet({
+                        access_token: bank.accessToken,
+                    });
+                    const accountData = accountsResponse.data.accounts[0];
 
-                // get institution info from plaid
-                const institution = await getInstitution({
-                    institutionId: accountsResponse.data.item.institution_id!,
-                });
+                    // get institution info from plaid
+                    const institution = await getInstitution({
+                        institutionId: accountsResponse.data.item.institution_id!,
+                    });
 
-                const account = {
-                    id: accountData.account_id,
-                    availableBalance: accountData.balances.available!,
-                    currentBalance: accountData.balances.current!,
-                    institutionId: institution.institution_id,
-                    name: accountData.name,
-                    officialName: accountData.official_name,
-                    mask: accountData.mask!,
-                    type: accountData.type as string,
-                    subtype: accountData.subtype! as string,
-                    appwriteItemId: bank.$id,
-                    shareableId: bank.shareableId,
-                    manualBalance: (bank.manualBalance !== undefined && bank.manualBalance !== null) ? bank.manualBalance : accountData.balances.current!,
-                };
+                    const account = {
+                        id: accountData.account_id,
+                        availableBalance: accountData.balances.available!,
+                        currentBalance: accountData.balances.current!,
+                        institutionId: institution.institution_id,
+                        name: accountData.name,
+                        officialName: accountData.official_name,
+                        mask: accountData.mask!,
+                        type: accountData.type as string,
+                        subtype: accountData.subtype! as string,
+                        appwriteItemId: bank.$id,
+                        shareableId: bank.shareableId,
+                        manualBalance: (bank.manualBalance !== undefined && bank.manualBalance !== null) ? bank.manualBalance : accountData.balances.current!,
+                    };
 
-                return account;
+                    return account;
+                } catch (error: any) {
+                    const plaidErrorCode = error?.response?.data?.error_code;
+                    if (plaidErrorCode === 'ITEM_LOGIN_REQUIRED') {
+                        console.warn("[Plaid] ITEM_LOGIN_REQUIRED for bank:", bank.$id);
+                        return { hasLoginError: true, bankId: bank.$id };
+                    }
+                    console.error("Error fetching account for bank:", bank.$id, error);
+                    return null;
+                }
             })
         );
+
+        const accounts = accountsRaw.filter((a) => a !== null && !a.hasLoginError);
+        const expiredBankCount = accountsRaw.filter((a) => a?.hasLoginError).length;
 
         const totalBanks = accounts.length;
         const totalCurrentBalance = accounts.reduce((total, account) => {
             return total + account.currentBalance;
         }, 0);
 
+        if (totalBanks === 0 && expiredBankCount > 0) {
+            return parseStringify({ error: 'ITEM_LOGIN_REQUIRED', data: [], totalBanks: 0, totalCurrentBalance: 0 });
+        }
+
         return parseStringify({ data: accounts, totalBanks, totalCurrentBalance });
-    } catch (error) {
+    } catch (error: any) {
+        // Check if the error is ITEM_LOGIN_REQUIRED (expired/invalid Plaid access token)
+        const plaidErrorCode = error?.response?.data?.error_code;
+        if (plaidErrorCode === 'ITEM_LOGIN_REQUIRED') {
+            console.warn("[Plaid] ITEM_LOGIN_REQUIRED — bank reconnection needed for user:", userId);
+            return parseStringify({ error: 'ITEM_LOGIN_REQUIRED', data: [], totalBanks: 0, totalCurrentBalance: 0 });
+        }
         console.error("An error occurred while getting the accounts:", error);
+        return parseStringify({ error: 'UNKNOWN_ERROR', data: [], totalBanks: 0, totalCurrentBalance: 0 });
     }
 };
 
