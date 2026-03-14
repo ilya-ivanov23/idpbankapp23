@@ -5,6 +5,7 @@ import { Inter, IBM_Plex_Serif } from "next/font/google";
 import "./globals.css";
 import { BalanceProvider } from "@/components/BalanceProvider";
 import { ThemeProvider } from "@/components/theme-provider";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 const ibmPlexSerif = IBM_Plex_Serif({
@@ -39,6 +40,7 @@ export default function RootLayout({
           {children}
         </BalanceProvider>
         </ThemeProvider>
+        <Script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js" strategy="beforeInteractive" />
       </body>
       </html>
   );

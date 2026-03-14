@@ -18,6 +18,7 @@ import Footer from "@/components/Footer";
 import { useBalance } from './BalanceProvider';
 import PlaidLink from "@/components/PlaidLink";
 import { ModeToggle } from "@/components/ModeToggle";
+import { Button } from "@/components/ui/button";
 
 
 const MobileNav = ({ user }: MobileNavProps) => {
@@ -76,7 +77,25 @@ const MobileNav = ({ user }: MobileNavProps) => {
                                 })}
 
                                 <div className="ml-5">
-                                    <PlaidLink user={user} />
+                                    <SheetClose asChild>
+                                        <Button
+                                            className="plaidlink-default w-full"
+                                            onClick={() => {
+                                                const sidebarPlaidBtn = document.querySelector('.sidebar .plaidlink-default') as HTMLButtonElement | null;
+                                                if (sidebarPlaidBtn) {
+                                                    sidebarPlaidBtn.click();
+                                                }
+                                            }}
+                                        >
+                                            <Image
+                                                src="/icons/connect-bank.svg"
+                                                alt="connect bank"
+                                                width={24}
+                                                height={24}
+                                            />
+                                            <p className="text-[16px] font-semibold text-black-2 dark:text-white">Connect bank</p>
+                                        </Button>
+                                    </SheetClose>
                                 </div>
                             </nav>
 
