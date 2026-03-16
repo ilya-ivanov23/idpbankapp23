@@ -47,8 +47,9 @@ export const signIn = async ({ email, password }: signInProps) => {
         const user = await getUserInfo({ userId: session.userId })
 
         return parseStringify(user);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error', error);
+        return { error: error?.message || 'Invalid email or password. Please try again.' };
     }
 }
 
@@ -100,8 +101,9 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
         });
 
         return parseStringify(newUser);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error', error);
+        return { error: error?.message || 'Error creating user. Please try again.' };
     }
 }
 
