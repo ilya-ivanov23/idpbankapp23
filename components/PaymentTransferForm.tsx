@@ -28,7 +28,7 @@ import { Textarea } from "./ui/textarea";
 
 const formSchema = z.object({
     email: z.string().email("Invalid email address"),
-    name: z.string().min(4, "Transfer note is too short"),
+    name: z.string().min(4, "Transfer note is too short").max(100, "Transfer note must be at most 100 characters"),
     amount: z.string().min(4, "Amount is too short"),
     senderBank: z.string().min(4, "Please select a valid bank account"),
     sharableId: z.string().min(8, "Please select a valid sharable Id"),
@@ -163,11 +163,16 @@ const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
                                 </div>
                                 <div className="flex w-full flex-col">
                                     <FormControl>
-                                        <Textarea
-                                            placeholder="Write a short note here"
-                                            className="input-class"
-                                            {...field}
-                                        />
+                                        <div>
+                                            <Textarea
+                                                placeholder="Write a short note here"
+                                                className="input-class resize-none"
+                                                {...field}
+                                            />
+                                            <div className={`text-12 text-right mt-1 ${(field.value?.length || 0) > 100 ? 'text-red-500' : 'text-gray-500'}`}>
+                                                {100 - (field.value?.length || 0)} characters left
+                                            </div>
+                                        </div>
                                     </FormControl>
                                     <FormMessage className="text-12 text-red-500" />
                                 </div>
