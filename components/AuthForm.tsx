@@ -45,6 +45,7 @@ const AuthForm = ({ type }: { type: string }) => {
     // 2. Define a submit handler.
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         setIsLoading(true);
+        setErrorMessage(""); // clear previous errors
 
         try {
             // Sign up with Appwrite & create plaid token
@@ -65,7 +66,11 @@ const AuthForm = ({ type }: { type: string }) => {
 
                 const newUser = await signUp(userData);
 
-                setUser(newUser);
+                if (newUser?.error) {
+                    setErrorMessage(newUser.error);
+                } else {
+                    setUser(newUser);
+                }
             }
 
             if (type === 'sign-in') {
@@ -74,7 +79,11 @@ const AuthForm = ({ type }: { type: string }) => {
                     password: data.password,
                 })
 
-                if (response) router.push('/')
+                if (response?.error) {
+                    setErrorMessage(response.error);
+                } else if (response) {
+                    router.push('/')
+                }
             }
         } catch (error) {
             console.log(error);
