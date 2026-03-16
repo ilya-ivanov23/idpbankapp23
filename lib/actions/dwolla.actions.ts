@@ -64,12 +64,12 @@ const updateBankBalance = async (bankId: string, amountChange: number) => {
 };
 
 // Get existing funding sources for a customer (used when DuplicateResource occurs)
-const getExistingFundingSource = async (customerId: string): Promise<string | null> => {
+const getExistingFundingSource = async (customerId: string, fundingSourceName: string): Promise<string | null> => {
     try {
         const res = await dwollaClient.get(`customers/${customerId}/funding-sources`);
         const sources = res.body._embedded?.["funding-sources"] ?? [];
-        // Return the first non-balance funding source URL
-        const source = sources.find((s: any) => s.type !== 'balance' && s.status !== 'removed');
+        // Return the funding source that matches the name provided
+        const source = sources.find((s: any) => s.name === fundingSourceName && s.status !== 'removed');
         return source ? source._links.self.href : null;
     } catch (err) {
         console.error("Getting existing funding sources failed:", err);
@@ -93,7 +93,7 @@ export const createFundingSource = async (
         const isDuplicate = err?.body?.code === 'DuplicateResource';
         if (isDuplicate) {
             console.warn("[Dwolla] DuplicateResource — returning existing funding source URL");
-            return await getExistingFundingSource(options.customerId);
+            return await getExistingFundingSource(options.customerId, options.fundingSourceName);
         }
         console.error("Creating a Funding Source Failed: ", err);
     }
@@ -149,6 +149,13 @@ export const createTransfer = async ({
                 value: amount,
             },
         };
+
+        console.log("---- Dwolla Transfer Request ----");
+        console.log("Source:", sourceFundingSourceUrl);
+        console.log("Destination:", destinationFundingSourceUrl);
+        console.log("Amount:", amount);
+        console.log("---------------------------------");
+
         const transfer = await dwollaClient
             .post("transfers", requestBody)
             .then((res) => res.headers.get("location"));
@@ -176,8 +183,8 @@ export const createTransfer = async ({
         }
 
         return transfer;
-    } catch (err) {
-        console.error("Transfer fund failed: ", err);
+    } catch (err: any) {
+        console.error("Transfer fund failed: ", err?.body?._embedded?.errors || err);
     }
 };
 
