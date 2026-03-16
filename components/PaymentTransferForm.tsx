@@ -29,7 +29,7 @@ import { Textarea } from "./ui/textarea";
 const formSchema = z.object({
     email: z.string().email("Invalid email address"),
     name: z.string().min(4, "Transfer note is too short").max(100, "Transfer note must be at most 100 characters"),
-    amount: z.string().min(4, "Amount is too short"),
+    amount: z.string().min(1, "Amount is required").refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, "Amount must be a positive number"),
     senderBank: z.string().min(4, "Please select a valid bank account"),
     sharableId: z.string().min(8, "Please select a valid sharable Id"),
 });
@@ -77,10 +77,19 @@ const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
                 ? receiverBank.userId.$id
                 : receiverBank.userId;
 
+            if (senderBank.$id === receiverBank.$id) {
+                form.setError("sharableId", {
+                    type: "manual",
+                    message: "You cannot transfer funds to the exact same account you are sending from.",
+                });
+                setIsLoading(false);
+                return;
+            }
+
             const transferParams = {
                 sourceFundingSourceUrl: senderBank.fundingSourceUrl,
                 destinationFundingSourceUrl: receiverBank.fundingSourceUrl,
-                amount: data.amount,
+                amount: parseFloat(data.amount).toFixed(2),
                 name: data.name,
                 email: data.email,
                 senderId: String(senderId),
