@@ -187,6 +187,7 @@ export const createBankAccount = async ({
 export const exchangePublicToken = async ({
     publicToken,
     user,
+    accountId,
 }: exchangePublicTokenProps) => {
     try {
         // Exchange public token for access token and item ID
@@ -202,7 +203,10 @@ export const exchangePublicToken = async ({
             access_token: accessToken,
         });
 
-        const accountData = accountsResponse.data.accounts[0];
+        // Find the specific account by accountId, or default to the first one
+        const accountData = accountId 
+            ? accountsResponse.data.accounts.find((a) => a.account_id === accountId) || accountsResponse.data.accounts[0]
+            : accountsResponse.data.accounts[0];
 
         // Create a processor token for Dwolla using the access token and account ID
         const request: ProcessorTokenCreateRequest = {
