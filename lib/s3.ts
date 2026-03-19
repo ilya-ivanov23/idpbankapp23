@@ -1,24 +1,35 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
-const s3Endpoint = process.env.S3_ENDPOINT;
-const s3AccessKey = process.env.S3_ACCESS_KEY;
-const s3SecretKey = process.env.S3_SECRET_KEY;
-const s3BucketName = process.env.S3_BUCKET_NAME;
+let s3ClientInstance: S3Client | null = null;
 
-if (!s3Endpoint || !s3AccessKey || !s3SecretKey || !s3BucketName) {
-  throw new Error("S3 (MinIO) secrets are not set in the .env file!");
+/**
+ * Lazy initialization (паттерн Singleton). 
+ * Создает клиент S3 только в тот момент, когда он реально нужен (например при загрузке файла),
+ * а не во время сборки Next.js (поиск по файлам).
+ */
+function getS3Client(): S3Client {
+  if (s3ClientInstance) return s3ClientInstance;
+
+  const s3Endpoint = process.env.S3_ENDPOINT;
+  const s3AccessKey = process.env.S3_ACCESS_KEY;
+  const s3SecretKey = process.env.S3_SECRET_KEY;
+
+  if (!s3Endpoint || !s3AccessKey || !s3SecretKey) {
+    throw new Error("S3 (MinIO) secrets are not set in the environment variables!");
+  }
+
+  s3ClientInstance = new S3Client({
+    endpoint: s3Endpoint,
+    region: "us-east-1",
+    credentials: {
+      accessKeyId: s3AccessKey,
+      secretAccessKey: s3SecretKey,
+    },
+    forcePathStyle: true, 
+  });
+
+  return s3ClientInstance;
 }
-
-export const s3Client = new S3Client({
-  endpoint: s3Endpoint,       // Where to connect (http://localhost:9000)
-  region: "us-east-1",        // Default for AWS (MinIO ignores it, but SDK requires a value)
-  credentials: {
-    accessKeyId: s3AccessKey,
-    secretAccessKey: s3SecretKey,
-  },
-  // IMPORTANT for MinIO: instructs SDK to use URL format endpoint/bucket, not subdomain bucket.endpoint
-  forcePathStyle: true, 
-});
 
 /**
  * Universal function to upload a document to S3
@@ -31,7 +42,14 @@ export async function uploadDocumentToS3(
   fileName: string, 
   mimeType: string = "application/pdf"
 ) {
+  const s3BucketName = process.env.S3_BUCKET_NAME;
+  if (!s3BucketName) {
+    throw new Error("S3_BUCKET_NAME is not set in the environment variables!");
+  }
+
   try {
+    const s3Client = getS3Client();
+
     // 1. "Put object into bucket" command
     const command = new PutObjectCommand({
       Bucket: s3BucketName,
