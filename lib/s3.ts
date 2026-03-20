@@ -61,9 +61,10 @@ export async function uploadDocumentToS3(
     // 2. Send command to MinIO
     await s3Client.send(command);
 
-    // 3. Return a public clean link for the frontend and DB
-    // NGINX will catch the word /storage/, strip it, and serve the file from the bank-documents bucket
-    return `/storage/${s3BucketName}/${fileName}`;
+    // 3. Возвращаем публичную ссылку для фронтенда и Базы Данных (Appwrite)
+    // Cloudflare R2:
+    const publicUrlBase = process.env.NEXT_PUBLIC_S3_URL || "https://pub-fe2adf4adae24598834e9e7b5c18175a.r2.dev";
+    return `${publicUrlBase}/${fileName}`;
     
   } catch (error) {
     console.error("S3 Error while uploading the document:", error);
