@@ -179,7 +179,6 @@ export const createTransfer = async ({
             // Update receiver's manual balance (Credit)
             await updateBankBalance(receiverBankId, Number(amount));
 
-            revalidatePath("/");
         }
 
         return transfer;
