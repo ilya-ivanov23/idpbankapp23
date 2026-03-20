@@ -16,27 +16,28 @@ export const createTransaction = async (transaction: CreateTransactionProps) => 
     try {
         const { database } = await createAdminClient();
 
-        // 1. Fetch Sender and Receiver data from Appwrite Users collection
-        const sender = await database.getDocument(
+        // 1. Fetch Sender and Receiver data from Appwrite Users collection (using listDocuments because senderId is userId, not docId)
+        const senderRes = await database.listDocuments(
             DATABASE_ID!,
             USER_COLLECTION_ID!,
-            transaction.senderId
+            [Query.equal('userId', [transaction.senderId])]
         );
+        const sender = senderRes.documents[0];
 
         let receiver;
         try {
-            receiver = await database.getDocument(
+            const receiverRes = await database.listDocuments(
                 DATABASE_ID!,
                 USER_COLLECTION_ID!,
-                transaction.receiverId
+                [Query.equal('userId', [transaction.receiverId])]
             );
+            receiver = receiverRes.documents[0];
         } catch (e) {
-            // Unlikely to happen, but good fallback just in case
-            receiver = { firstName: 'Unknown', lastName: 'User' };
+            receiver = null;
         }
 
-        const senderFullName = `${(sender as any).firstName} ${(sender as any).lastName}`;
-        const receiverFullName = `${(receiver as any).firstName} ${(receiver as any).lastName}`;
+        const senderFullName = sender ? `${(sender as any).firstName} ${(sender as any).lastName}` : "Unknown Sender";
+        const receiverFullName = receiver ? `${(receiver as any).firstName} ${(receiver as any).lastName}` : "Unknown Receiver";
 
         // 2. Generate a unique ID for the Appwrite transaction (and for the PDF file name)
         const transactionId = ID.unique();
@@ -57,22 +58,29 @@ export const createTransaction = async (transaction: CreateTransactionProps) => 
         const receiptFileName = `receipt_${transactionId}.pdf`;
         const receiptUrl = await uploadDocumentToS3(pdfBuffer, receiptFileName);
 
-        // 4. Save to Appwrite Database (the receiptUrl string instead of the file!)
+        // 4. Save to Appwrite Database (only fields that exist in the collection attributes)
         const newTransaction = await database.createDocument(
             DATABASE_ID!,
             TRANSACTION_COLLECTION_ID!,
             transactionId,
             {
+                name: transaction.name,
+                amount: transaction.amount,
+                senderId: transaction.senderId,
+                receiverId: transaction.receiverId,
+                senderBankId: transaction.senderBankId,
+                receiverBankId: transaction.receiverBankId,
+                email: transaction.email,
                 channel: 'online',
                 category: 'Transfer',
-                receiptUrl: receiptUrl, // <== IMPORTANT: We save the LINK in the database
-                ...transaction
+                receiptUrl: receiptUrl
             }
         )
 
         return parseStringify(newTransaction);
     } catch (error) {
         console.error("Error creating transaction in Appwrite:", error);
+        throw error; // Important to re-throw so the caller knows it failed
     }
 }
 

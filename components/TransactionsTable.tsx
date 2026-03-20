@@ -49,7 +49,7 @@ const TransactionsTable = ({ transactions }: TransactionTableProps) => {
                     const isCredit = t.type === 'credit';
 
                     return (
-                        <TableRow key={t.id} className={`${isDebit || amount[0] === '-' ? 'bg-[#FFFBFA] dark:bg-[#1b1b1f]' : 'bg-[#F6FEF9] dark:bg-[#161d16]'} !over:bg-none !border-b-DEFAULT dark:border-gray-800`}>
+                        <TableRow key={t.$id || t.id} className={`${isDebit || amount[0] === '-' ? 'bg-[#FFFBFA] dark:bg-[#1b1b1f]' : 'bg-[#F6FEF9] dark:bg-[#161d16]'} !over:bg-none !border-b-DEFAULT dark:border-gray-800`}>
                             <TableCell className="max-w-[250px] pl-2 pr-10">
                                 <div className="flex items-center gap-3">
                                     <h1 className="text-14 truncate font-semibold text-[#344054] dark:text-white">
@@ -81,24 +81,26 @@ const TransactionsTable = ({ transactions }: TransactionTableProps) => {
                                 <CategoryBadge category={t.category || 'Other'} />
                             </TableCell>
 
-                            <TableCell className="pl-2 text-right float-right">
-                                {t.receiptUrl ? (
-                                    <a 
-                                        href={t.receiptUrl} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-1 text-[12px] font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors dark:text-blue-400 dark:bg-blue-900/30"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                            <polyline points="7 10 12 15 17 10"></polyline>
-                                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                                        </svg>
-                                        PDF
-                                    </a>
-                                ) : (
-                                    <span className="text-gray-400 text-[12px] italic">-</span>
-                                )}
+                            <TableCell className="pl-2 text-right">
+                                <div className="flex justify-end pr-2">
+                                    {t.receiptUrl ? (
+                                        <a 
+                                            href={t.receiptUrl} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-1 text-[12px] font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors dark:text-blue-400 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-800"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                <polyline points="7 10 12 15 17 10"></polyline>
+                                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                                            </svg>
+                                            PDF
+                                        </a>
+                                    ) : (
+                                        <span className="text-gray-400 text-[12px] italic">-</span>
+                                    )}
+                                </div>
                             </TableCell>
                         </TableRow>
                     )
