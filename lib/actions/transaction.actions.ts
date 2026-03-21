@@ -5,6 +5,7 @@ import { createAdminClient } from "../appwrite";
 import { parseStringify } from "../utils";
 import { generateReceiptPdf } from "../pdf";
 import { uploadDocumentToS3 } from "../s3";
+import { clearCache } from "../redis";
 
 const {
     APPWRITE_DATABASE_ID: DATABASE_ID,

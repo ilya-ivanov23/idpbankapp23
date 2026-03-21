@@ -5,6 +5,7 @@ import { createTransaction } from "./transaction.actions";
 import { createAdminClient } from "../appwrite";
 import { plaidClient } from "@/lib/plaid";
 import { revalidatePath } from "next/cache";
+import { clearCache } from "../redis";
 
 const getEnvironment = (): "production" | "sandbox" => {
     const environment = process.env.DWOLLA_ENV as string;
@@ -179,6 +180,13 @@ export const createTransfer = async ({
             // Update receiver's manual balance (Credit)
             await updateBankBalance(receiverBankId, Number(amount));
 
+            // Invalidate Redis caches so that the next API call properly fetches the updated balance and transaction history
+            await clearCache(
+                `accounts:${senderId}`,
+                `accounts:${receiverId}`,
+                `account:${senderBankId}`,
+                `account:${receiverBankId}`
+            );
         }
 
         return transfer;
