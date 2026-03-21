@@ -15,13 +15,18 @@ import { parseStringify } from "../utils";
 import { getTransactionsByBankId } from "./transaction.actions";
 import { getBanks, getBank } from "./user.actions";
 
+import { withCache } from "../redis";
+
 // Get multiple bank accounts
 export const getAccounts = async ({ userId }: getAccountsProps) => {
-    try {
-        // get banks from db
-        const banks = await getBanks({ userId });
+    return withCache(
+        `accounts:${userId}`,
+        async () => {
+            try {
+                // get banks from db
+                const banks = await getBanks({ userId });
 
-        const accountsRaw = await Promise.all(
+                const accountsRaw = await Promise.all(
             banks?.map(async (bank: Bank) => {
                 try {
                     // get each account info from plaid
@@ -86,15 +91,20 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
         console.error("An error occurred while getting the accounts:", error);
         return parseStringify({ error: 'UNKNOWN_ERROR', data: [], totalBanks: 0, totalCurrentBalance: 0 });
     }
+    }
+  );
 };
 
 // Get one bank account
 export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
-    try {
-        // get bank from db
-        const bank = await getBank({ documentId: appwriteItemId });
+    return withCache(
+        `account:${appwriteItemId}`,
+        async () => {
+            try {
+                // get bank from db
+                const bank = await getBank({ documentId: appwriteItemId });
 
-        // get account info from plaid
+                // get account info from plaid
         const accountsResponse = await plaidClient.accountsGet({
             access_token: bank.accessToken,
         });
@@ -152,6 +162,7 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
     } catch (error) {
         console.error("An error occurred while getting the account:", error);
     }
+  });
 };
 
 // Get bank info
