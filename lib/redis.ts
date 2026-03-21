@@ -57,3 +57,20 @@ export async function withCache<T>(
     return await fetcher();
   }
 }
+
+/**
+ * Universal Cache Invalidation
+ * @param keys Array of cache keys to clear
+ */
+export async function clearCache(...keys: string[]) {
+  if (!redis) return;
+
+  try {
+    if (keys.length > 0) {
+      await redis.del(...keys);
+      console.log(`[Redis] 🗑️ CACHE CLEARED: ${keys.join(", ")}`);
+    }
+  } catch (error) {
+    console.error(`[Redis] ❌ Error clearing cache for:`, keys, error);
+  }
+}
