@@ -58,13 +58,14 @@ const BankCard = ({ account, userName, showBalance = true }: CreditCardProps) =>
                     />
                 </div>
 
-                <Image
-                    src="/icons/lines.png"
-                    width={316}
-                    height={250}
-                    alt="lines"
-                    className="absolute bottom-3 left-0 h-[130%]"
-                />
+                <div className="absolute top-0 left-0 w-full h-full">
+                    <Image
+                        src="/icons/lines.png"
+                        fill
+                        alt="lines"
+                        className="object-contain"
+                    />
+                </div>
             </Link>
 
             {showBalance && <Copy title={account?.shareableId} />}
