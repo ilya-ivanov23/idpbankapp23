@@ -14,13 +14,20 @@ const ibmPlexSerif = IBM_Plex_Serif({
   variable: '--font-ibm-plex-serif'
 })
 
-export const metadata: Metadata = {
-  title: "IDPBankApp",
-  description: "IDP multiplatform for user which chooses future",
-  icons: {
-    icon: '/icons/logo.svg'
-  }
-};
+import * as Sentry from '@sentry/nextjs';
+
+export function generateMetadata(): Metadata {
+  return {
+    title: "IDPBankApp",
+    description: "IDP multiplatform for user which chooses future",
+    icons: {
+      icon: '/icons/logo.svg'
+    },
+    other: {
+      ...Sentry.getTraceData()
+    }
+  };
+}
 
 export default function RootLayout({
                                      children,
