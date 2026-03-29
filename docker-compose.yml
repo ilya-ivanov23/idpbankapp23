@@ -72,6 +72,22 @@ services:
     networks:
       - bank_network
 
+  # 6. Promtail - Lightweight agent for streaming logs to Grafana Cloud
+  promtail:
+    image: grafana/promtail:latest
+    container_name: bank_promtail
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./promtail-config.yaml:/etc/promtail/config.yml:ro
+    command: -config.file=/etc/promtail/config.yml -config.expand-env=true
+    environment:
+      - LOKI_URL=${LOKI_URL}
+      - LOKI_USER=${LOKI_USER}
+      - LOKI_PASSWORD=${LOKI_PASSWORD}
+    restart: always
+    networks:
+      - bank_network
+
 volumes:
   minio_data:
   kafka_data:
