@@ -3,13 +3,14 @@ name: CI/CD Pipeline
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev", "develop" ]
+  pull_request:
+    branches: [ "main", "dev", "develop" ]
 
 jobs:
   test-and-lint:
     name: 🏗️ Test & Lint
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'docs')"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,6 +23,7 @@ jobs:
   build-and-push:
     name: 🐳 Build & Push to GHCR
     needs: test-and-lint
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
