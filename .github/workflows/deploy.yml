@@ -19,6 +19,12 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run test
+      
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+        
+      - name: Run Playwright E2E tests
+        run: npx playwright test
 
   build-and-push:
     name: 🐳 Build & Push to GHCR
