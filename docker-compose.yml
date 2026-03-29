@@ -72,6 +72,55 @@ services:
     networks:
       - bank_network
 
+  # 5. Promtail - ships container logs → Grafana Cloud Loki (SCRUM-91)
+  promtail:
+    image: grafana/promtail:latest
+    container_name: bank_promtail
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./monitoring/promtail-config.yaml:/etc/promtail/config.yml:ro
+    command: -config.file=/etc/promtail/config.yml -config.expand-env=true
+    environment:
+      - LOKI_URL=${LOKI_URL}
+      - LOKI_USER=${LOKI_USER}
+      - LOKI_PASSWORD=${LOKI_PASSWORD}
+    restart: always
+    networks:
+      - bank_network
+
+  # 6. Node Exporter - exposes host metrics (CPU, RAM, Disk) for Prometheus (SCRUM-92)
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: bank_node_exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--collector.netdev.device-exclude=^(veth|br-|docker|lo).*'
+    restart: always
+    networks:
+      - bank_network
+
+  # 7. Grafana Alloy - scrapes metrics and ships them → Grafana Cloud (SCRUM-90)
+  alloy:
+    image: grafana/alloy:latest
+    container_name: bank_alloy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./monitoring/alloy-config.alloy:/etc/alloy/config.alloy:ro
+    command: run /etc/alloy/config.alloy
+    environment:
+      - PROMETHEUS_URL=${PROMETHEUS_URL}
+      - PROMETHEUS_USER=${PROMETHEUS_USER}
+      - PROMETHEUS_PASSWORD=${PROMETHEUS_PASSWORD}
+    restart: always
+    networks:
+      - bank_network
+
 volumes:
   minio_data:
   kafka_data:

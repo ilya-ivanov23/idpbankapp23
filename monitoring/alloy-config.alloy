@@ -1,0 +1,45 @@
+// ============================================================
+// GRAFANA ALLOY CONFIG - Metrics → Grafana Cloud Prometheus
+// ============================================================
+
+// 1. Discover all running Docker containers
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+// 2. Relabel: use container name as the "job" label
+discovery.relabel "containers" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+}
+
+// 3. Scrape metrics from every container that exposes /metrics on port 9100
+prometheus.scrape "docker" {
+  targets    = discovery.relabel.containers.output
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+// 4. Also scrape node-exporter for host-level metrics (CPU, RAM, Disk)
+prometheus.scrape "node_exporter" {
+  targets = [{
+    __address__ = "node-exporter:9100",
+  }]
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+// 5. Send all collected metrics to Grafana Cloud
+prometheus.remote_write "grafana_cloud" {
+  endpoint {
+    url = env("PROMETHEUS_URL")
+
+    basic_auth {
+      username = env("PROMETHEUS_USER")
+      password = env("PROMETHEUS_PASSWORD")
+    }
+  }
+}
