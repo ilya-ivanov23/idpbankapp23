@@ -25,6 +25,24 @@ jobs:
         
       - name: Run Playwright E2E tests
         run: npx playwright test
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_APPWRITE_ENDPOINT: ${{ secrets.NEXT_PUBLIC_APPWRITE_ENDPOINT }}
+          NEXT_PUBLIC_APPWRITE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_APPWRITE_PROJECT_ID }}
+          NEXT_APPWRITE_KEY: ${{ secrets.NEXT_APPWRITE_KEY }}
+          APPWRITE_DATABASE_ID: ${{ secrets.APPWRITE_DATABASE_ID }}
+          APPWRITE_USER_COLLECTION_ID: ${{ secrets.APPWRITE_USER_COLLECTION_ID }}
+          APPWRITE_BANK_COLLECTION_ID: ${{ secrets.APPWRITE_BANK_COLLECTION_ID }}
+          APPWRITE_TRANSACTION_COLLECTION_ID: ${{ secrets.APPWRITE_TRANSACTION_COLLECTION_ID }}
+          PLAID_CLIENT_ID: ${{ secrets.PLAID_CLIENT_ID }}
+          PLAID_SECRET: ${{ secrets.PLAID_SECRET }}
+          PLAID_ENV: sandbox
+          PLAID_PRODUCTS: ${{ secrets.PLAID_PRODUCTS }}
+          PLAID_COUNTRY_CODES: ${{ secrets.PLAID_COUNTRY_CODES }}
+          DWOLLA_KEY: ${{ secrets.DWOLLA_KEY }}
+          DWOLLA_SECRET: ${{ secrets.DWOLLA_SECRET }}
+          DWOLLA_ENV: sandbox
+          DWOLLA_BASE_URL: ${{ secrets.DWOLLA_WEBHOOK_URL }}
 
   build-and-push:
     name: 🐳 Build & Push to GHCR
