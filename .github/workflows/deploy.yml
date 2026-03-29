@@ -3,9 +3,9 @@ name: CI/CD Pipeline
 on:
   workflow_dispatch:
   push:
-    branches: [ "main", "dev", "develop" ]
+    branches: ["main", "dev", "develop"]
   pull_request:
-    branches: [ "main", "dev", "develop" ]
+    branches: ["main", "dev", "develop"]
 
 jobs:
   test-and-lint:
@@ -19,10 +19,10 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run test
-      
+
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-        
+
       - name: Run Playwright E2E tests
         run: npx playwright test
         env:
@@ -105,8 +105,8 @@ jobs:
           host: ${{ secrets.GCP_HOST }}
           username: ${{ secrets.GCP_USERNAME }}
           key: ${{ secrets.GCP_SSH_KEY }}
-          source: "monitoring/"
-          target: "~/idpbankapp23/"
+          source: monitoring/
+          target: ~/idpbankapp23/
 
       - name: Deploy to GCP Server
         uses: appleboy/ssh-action@v1.0.3
@@ -117,18 +117,12 @@ jobs:
           script: |
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             cd ~/idpbankapp23
-
-            # Inject Grafana Loki secrets into .env
             grep -qxF "LOKI_URL=${{ secrets.LOKI_URL }}" .env || echo "LOKI_URL=${{ secrets.LOKI_URL }}" >> .env
             grep -qxF "LOKI_USER=${{ secrets.LOKI_USER }}" .env || echo "LOKI_USER=${{ secrets.LOKI_USER }}" >> .env
             grep -qxF "LOKI_PASSWORD=${{ secrets.LOKI_PASSWORD }}" .env || echo "LOKI_PASSWORD=${{ secrets.LOKI_PASSWORD }}" >> .env
-
-            # Inject Prometheus secrets into .env
             grep -qxF "PROMETHEUS_URL=${{ secrets.PROMETHEUS_URL }}" .env || echo "PROMETHEUS_URL=${{ secrets.PROMETHEUS_URL }}" >> .env
             grep -qxF "PROMETHEUS_USER=${{ secrets.PROMETHEUS_USER }}" .env || echo "PROMETHEUS_USER=${{ secrets.PROMETHEUS_USER }}" >> .env
             grep -qxF "PROMETHEUS_PASSWORD=${{ secrets.PROMETHEUS_PASSWORD }}" .env || echo "PROMETHEUS_PASSWORD=${{ secrets.PROMETHEUS_PASSWORD }}" >> .env
-
             docker compose pull
             docker compose up -d --force-recreate
             docker image prune -f
-
