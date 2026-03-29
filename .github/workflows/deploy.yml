@@ -103,7 +103,16 @@ jobs:
           username: ${{ secrets.GCP_USERNAME }}
           key: ${{ secrets.GCP_SSH_KEY }}
           script: |
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             cd ~/idpbankapp23
+            
+            # Write Grafana Loki secrets to .env on the server
+            echo "" >> .env
+            echo "# GRAFANA LOKI" >> .env
+            echo "LOKI_URL=${{ secrets.LOKI_URL }}" >> .env
+            echo "LOKI_USER=${{ secrets.LOKI_USER }}" >> .env
+            echo "LOKI_PASSWORD=${{ secrets.LOKI_PASSWORD }}" >> .env
+            
             docker compose pull
             docker compose up -d --force-recreate
             docker image prune -f
