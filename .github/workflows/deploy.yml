@@ -117,9 +117,11 @@ jobs:
           script: |
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             cd ~/idpbankapp23
+            # Inject Grafana Loki secrets into .env
             grep -qxF "LOKI_URL=${{ secrets.LOKI_URL }}" .env || echo "LOKI_URL=${{ secrets.LOKI_URL }}" >> .env
             grep -qxF "LOKI_USER=${{ secrets.LOKI_USER }}" .env || echo "LOKI_USER=${{ secrets.LOKI_USER }}" >> .env
             grep -qxF "LOKI_PASSWORD=${{ secrets.LOKI_PASSWORD }}" .env || echo "LOKI_PASSWORD=${{ secrets.LOKI_PASSWORD }}" >> .env
+            # Inject Prometheus secrets into .env
             grep -qxF "PROMETHEUS_URL=${{ secrets.PROMETHEUS_URL }}" .env || echo "PROMETHEUS_URL=${{ secrets.PROMETHEUS_URL }}" >> .env
             grep -qxF "PROMETHEUS_USER=${{ secrets.PROMETHEUS_USER }}" .env || echo "PROMETHEUS_USER=${{ secrets.PROMETHEUS_USER }}" >> .env
             grep -qxF "PROMETHEUS_PASSWORD=${{ secrets.PROMETHEUS_PASSWORD }}" .env || echo "PROMETHEUS_PASSWORD=${{ secrets.PROMETHEUS_PASSWORD }}" >> .env
