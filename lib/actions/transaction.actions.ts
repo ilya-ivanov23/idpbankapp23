@@ -6,6 +6,7 @@ import { parseStringify } from "../utils";
 import { generateReceiptPdf } from "../pdf";
 import { uploadDocumentToS3 } from "../s3";
 import { clearCache } from "../redis";
+import { publishTransaction } from "../kafka/producer";
 
 const {
     APPWRITE_DATABASE_ID: DATABASE_ID,
@@ -77,6 +78,23 @@ export const createTransaction = async (transaction: CreateTransactionProps) => 
                 receiptUrl: receiptUrl
             }
         )
+
+        // 5. Publish event to Kafka (non-blocking: failure here won't break the transaction)
+        await publishTransaction({
+            transactionId,
+            amount: parseFloat(transaction.amount),
+            currency: 'USD',
+            senderId: transaction.senderId,
+            receiverId: transaction.receiverId,
+            senderBankId: transaction.senderBankId,
+            receiverBankId: transaction.receiverBankId,
+            status: 'SUCCESS',
+            channel: 'online',
+            category: 'Transfer',
+            name: transaction.name,
+            email: transaction.email,
+            timestamp: new Date().toISOString(),
+        });
 
         return parseStringify(newTransaction);
     } catch (error) {
