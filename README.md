@@ -1,71 +1,100 @@
-# IDPBank Application
+# 🏦 IDPBank: Enterprise-Grade Fintech Ecosystem
 
-A comprehensive modern banking platform built with Next.js, designed to provide users with a seamless financial management experience. This application allows users to connect multiple bank accounts, track real-time transactions, and transfer funds securely.
+[![Production](https://img.shields.io/badge/Production-Live-green?style=for-the-badge)](https://idpbank.app)
+[![Stack](https://img.shields.io/badge/Stack-Next.js%2015%20%7C%20GCP%20%7C%20Appwrite-blue?style=for-the-badge)](https://idpbank.app)
+[![Monitoring](https://img.shields.io/badge/Monitoring-Grafana%20%26%20Loki-orange?style=for-the-badge)](https://idpbank.app)
 
-## 🚀 Key Features
+**IDPBank** is a comprehensive banking platform combining real-world account aggregation, transaction management, and intelligent analytics. Built as a response to "Super-App fatigue," it offers a minimalist interface backed by a robust, cloud-native infrastructure deployed to modern security standards.
 
-- **Secure Authentication**: robust sign-up and sign-in functionality powered by Appwrite.
-- **Financial Dashboard**: Get a holistic view of your total balance across all connected accounts, recent transactions, and spending categories.
-- **Bank Integration (Plaid)**: Connect real bank accounts using Plaid API integration to fetch live balance and transaction data.
-- **Transaction History**: Detailed, filterable, and searchable table of all your financial activities.
-- **Funds Transfer**: Secure interface to transfer funds to other users within the platform.
-- **Responsive Design**: Fully responsive interface optimized for desktop, tablet, and mobile devices.
-- **Dark Mode Support**: Comprehensive dark mode implementation for comfortable viewing in low-light environments, featuring a premium dark palette.
+🌐 **Live Demo:** [idpbank.app](https://idpbank.app)
 
-## 🛠 Tech Stack
+---
 
-- **Frontend**: Next.js 14, React, TypeScript
-- **Styling**: Tailwind CSS, Shadcn UI
-- **Icons**: Lucide React
-- **Backend / Services**:
-  - **Appwrite**: Authentication, Database, and backend logic.
-  - **Plaid**: Banking data aggregation and integration.
-  - **Sentry**: Error tracking and performance monitoring.
-- **Form Handling**: React Hook Form with Zod validation.
+## 📸 Interface & UX
+*A seamless, distraction-free financial management experience.*
 
-## 📂 Project Structure
+| ![Main Dashboard](https://via.placeholder.com/800x450?text=Insert+Dashboard+Screenshot+Here) |
+|:--:|
+| *Central Dashboard: Real-time balance aggregation, activity charts, and recent transactions.* |
 
-- **/app**: Next.js App Router pages and layouts.
-- **/components**: Reusable UI components (Sidebar, MobileNav, BankCard, etc.).
-- **/lib**: Utility functions, server actions, and Appwrite configuration.
-- **/constants**: Static data and style configurations.
-- **/public**: Static assets (images, icons).
+| ![Bank Connection](https://via.placeholder.com/400x250?text=Insert+Plaid+Integration+Here) | ![Mobile View](https://via.placeholder.com/400x250?text=Insert+Mobile+UI+Here) |
+|:---:|:---:|
+| *Plaid Integration: Securely connect to 10,000+ banks.* | *Mobile-First Design: Fully responsive across all devices.* |
 
-## 🏃‍♂️ Getting Started
+---
+
+## 🏗 Technological Architecture (Current Production Stack)
+
+The project is built on a microservices-oriented logic and cloud infrastructure, ensuring high availability and secure data flow.
+
+### **Frontend & Core**
+* **Framework:** Next.js 15 (App Router) — Maximum performance, SSR, and SEO.
+* **Language:** TypeScript — Strict typing for all financial operations.
+* **Styling:** Tailwind CSS + Shadcn UI — Premium visual language with Dark Mode.
+* **State & Forms:** React Hook Form + Zod — Bulletproof data validation.
+
+### **Backend & Storage**
+* **BaaS:** Appwrite — Secure user authentication and core database management.
+* **Banking API:** Plaid SDK — Synchronization with the real-world banking sector.
+* **Storage:** S3-compatible storage (Cloudflare) for secure static assets.
+
+### **DevOps & Cloud**
+* **Cloud Hosting:** Google Cloud Platform (GCP).
+* **Reverse Proxy:** **Caddy** (Production) for automated SSL & Subdomain Routing / **Nginx** (Local).
+* **Edge Network:** **Cloudflare** (WAF, CDN, DNS) — DDoS protection and global edge delivery.
+* **Containerization:** Docker & Docker Compose for service isolation.
+
+---
+
+## 📊 Observability & Monitoring
+*Engineering without data is guessing. We monitor every event in the system.*
+
+The platform is equipped with a full observability stack, allowing proactive detection of server anomalies before they impact the user:
+* **Grafana:** Deep visualization of system performance metrics.
+* **Loki:** Centralized log aggregation across all Docker containers.
+* **Sentry:** Real-time client-side and server-side error tracking.
+
+| ![Grafana Dashboard](https://via.placeholder.com/800x300?text=Insert+Grafana+Metrics+Screenshot+Here) |
+|:--:|
+| *System Health Dashboard: Request logging, CPU load, and error analytics.* |
+
+---
+
+## 🔥 Key Features
+
+- ✅ **Multi-Bank Linking:** Aggregate multiple bank accounts into a single financial profile.
+- ✅ **Real-Time Transactions:** Instant updates of financial history via webhooks.
+- ✅ **Money Transfers:** Secure internal P2P transfer system.
+- ✅ **Category Analytics:** Automatic distribution of expenses by categories.
+- ✅ **Enterprise Security:** Multi-Factor Authentication (MFA) and data encryption at rest.
+
+---
+
+## 🗺️ Architectural Roadmap (Evolution to Polyglot Microservices)
+
+To handle massive scale and complex transactions, the system is currently evolving from its BaaS foundations into an **Event-Driven Enterprise Architecture**:
+
+- [ ] **Core Banking Engine:** Migrating the transaction ledger from Appwrite to **Java Spring Boot** + **PostgreSQL** (managed via Flyway) for strict ACID compliance.
+- [ ] **Event Bus:** Introducing **Apache Kafka (KRaft)** to handle asynchronous events and implement the Saga Pattern for distributed transaction rollbacks.
+- [ ] **On-Device AI Analytics:** Deploying **Gemma 4** models in an isolated Azure Docker container for private, intelligent budget optimization without exposing user data to third-party APIs.
+
+---
+
+## 🚀 Local Development
 
 1.  **Clone the repository:**
-
     ```bash
-    git clone https://github.com/your-username/idpbankapp23.git
+    git clone [https://github.com/ilya-ivanov23/idpbankapp23.git](https://github.com/ilya-ivanov23/idpbankapp23.git)
     cd idpbankapp23
-    ```
-
-2.  **Install dependencies:**
-
-    ```bash
     npm install
     ```
-
-3.  **Set up environment variables:**
-    Create a `.env` file in the root directory and configure your Appwrite, Plaid, and Sentry keys.
-
-4.  **Run the development server:**
-
+2.  **Infrastructure:**
+    The project infrastructure (Monitoring, Proxies) is Docker-ready:
     ```bash
-    npm run dev
+    docker-compose up -d
     ```
+3.  **Environment Variables:**
+    Configure the `.env` file using `.env.example` as a template (including Plaid, Appwrite, and Sentry keys).
 
-5.  **Open the app:**
-    Visit [http://localhost:3000](http://localhost:3000) in your browser.
-
-## 🎨 Design & Theming
-
-The application features a custom design system with:
-
-- **Light Mode**: Clean, professional interface with blues and greys.
-- **Dark Mode**: Sophisticated dark theme using deep slate/grey tones (inspired by Coursera's dark palette) for reduced eye strain and modern aesthetics.
-- **Dynamic Components**: Interactive elements like charts, transaction tables, and form inputs that adapt seamlessly to the selected theme.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+---
+*Developed by Ilya Ivanov — Software Engineer / DevOps*
