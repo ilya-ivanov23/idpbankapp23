@@ -1,7 +1,7 @@
 # 🏦 IDPBank: Enterprise-Grade Fintech Ecosystem
 
 [![Production](https://img.shields.io/badge/Production-Live-green?style=for-the-badge)](https://idpbank.app)
-[![Stack](https://img.shields.io/badge/Stack-Next.js%2015%20%7C%20GCP%20%7C%20Appwrite-blue?style=for-the-badge)](https://idpbank.app)
+[![Stack](https://img.shields.io/badge/Stack-Next.js%2014%20%7C%20GCP%20%7C%20Appwrite-blue?style=for-the-badge)](https://idpbank.app)
 [![Monitoring](https://img.shields.io/badge/Monitoring-Grafana%20%26%20Loki-orange?style=for-the-badge)](https://idpbank.app)
 
 **IDPBank** is a comprehensive banking platform combining real-world account aggregation, transaction management, and intelligent analytics. Built as a response to "Super-App fatigue," it offers a minimalist interface backed by a robust, cloud-native infrastructure deployed to modern security standards.
@@ -32,7 +32,7 @@
 The project is built on a microservices-oriented logic and cloud infrastructure, ensuring high availability and secure data flow.
 
 ### **Frontend & Core**
-* **Framework:** Next.js 15 (App Router) — Maximum performance, SSR, and SEO.
+* **Framework:** Next.js 14 (App Router) — Maximum performance, SSR, and SEO.
 * **Language:** TypeScript — Strict typing for all financial operations.
 * **Styling:** Tailwind CSS + Shadcn UI — Premium visual language with Dark Mode.
 * **State & Forms:** React Hook Form + Zod — Bulletproof data validation.
@@ -87,7 +87,7 @@ graph TD
     classDef database fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px,color:#000
 
     %% Frontend Layer
-    UI[🖥️ Next.js 15 UI<br/>Vercel Edge]:::frontend
+    UI[🖥️ Next.js 14 UI<br/>Vercel Edge]:::frontend
 
     %% GCP Core Banking Layer
     subgraph GCP [☁️ Google Cloud Platform: Core Engine]
