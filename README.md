@@ -76,11 +76,38 @@ The platform is equipped with a full observability stack, allowing proactive det
 
 ## 🗺️ Architectural Roadmap (Evolution to Polyglot Microservices)
 
-To handle massive scale and complex transactions, the system is currently evolving from its BaaS foundations into an **Event-Driven Enterprise Architecture**:
+graph TD
+    %% Styling
+    classDef frontend fill:#000,stroke:#333,stroke-width:2px,color:#fff
+    classDef gcp fill:#e3f2fd,stroke:#1e88e5,stroke-width:2px,color:#000
+    classDef azure fill:#e0f7fa,stroke:#00acc1,stroke-width:2px,color:#000
+    classDef database fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px,color:#000
 
-- [ ] **Core Banking Engine:** Migrating the transaction ledger from Appwrite to **Java Spring Boot** + **PostgreSQL** (managed via Flyway) for strict ACID compliance.
-- [ ] **Event Bus:** Introducing **Apache Kafka (KRaft)** to handle asynchronous events and implement the Saga Pattern for distributed transaction rollbacks.
-- [ ] **On-Device AI Analytics:** Deploying **Gemma 4** models in an isolated Azure Docker container for private, intelligent budget optimization without exposing user data to third-party APIs.
+    %% Frontend Layer
+    UI[🖥️ Next.js 15 UI<br/>Vercel Edge]:::frontend
+
+    %% GCP Core Banking Layer
+    subgraph GCP [☁️ Google Cloud Platform: Core Engine]
+        API[Node.js API Gateway<br/>JWT Validation]:::gcp
+        Kafka{Apache Kafka<br/>Event Bus}:::gcp
+        Java[☕ Java Spring Boot<br/>Transaction Engine]:::gcp
+        DB[(PostgreSQL<br/>ACID Ledger)]:::database
+    end
+
+    %% Azure AI Layer
+    subgraph Azure [☁️ Azure: Isolated AI Environment]
+        Gemma[🧠 Gemma 4 LLM<br/>Dockerized]:::azure
+    end
+
+    %% Flows
+    UI -->|HTTPS Request| API
+    API -->|Produce: TransactionEvent| Kafka
+    Kafka -->|Consume: Async Processing| Java
+    Java -->|Read/Write Ledger| DB
+    Java -->|Saga Pattern: RollbackEvent| Kafka
+    
+    %% AI Flow
+    API -.->|Fetch Private Insights| Gemma
 
 ---
 
