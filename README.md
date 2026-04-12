@@ -17,10 +17,13 @@
 |:--:|
 | *Central Dashboard: Real-time balance aggregation, activity charts, and recent transactions.* |
 
-| <img width="1901" height="1204" alt="Снимок экрана 2026-04-09 в 22 48 54" src="https://github.com/user-attachments/assets/af8283bb-c810-4360-8145-c9307610446c" />
- | ![Mobile View](https://via.placeholder.com/400x250?text=Insert+Mobile+UI+Here) |
-|:---:|:---:|
-| *Plaid Integration: Securely connect to 10,000+ banks.* | *Mobile-First Design: Fully responsive across all devices.* |
+| <img width="1901" height="1204" alt="Снимок экрана 2026-04-09 в 22 48 54" src="https://github.com/user-attachments/assets/af8283bb-c810-4360-8145-c9307610446c" />| 
+|:--:|
+| *Plaid Integration: Securely connect to 10,000+ banks.* |
+
+| <img width="433" height="933" alt="Снимок экрана 2026-04-09 в 22 49 49" src="https://github.com/user-attachments/assets/52bf2b31-47dc-42ad-b9bd-f1e5d8d6eda0" />|
+|:--:|
+| *Mobile-First Design: Fully responsive across all devices.* |
 
 ---
 
