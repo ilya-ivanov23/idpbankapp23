@@ -13,11 +13,12 @@
 ## 📸 Interface & UX
 *A seamless, distraction-free financial management experience.*
 
-| ![Main Dashboard](https://via.placeholder.com/800x450?text=<img width="1901" height="1204" alt="Снимок экрана 2026-04-09 в 22 47 57" src="https://github.com/user-attachments/assets/3f754a3a-a9d3-4c31-a86f-f60770756fb7" />) |
+| <img width="1901" height="1204" alt="Снимок экрана 2026-04-09 в 22 47 57" src="https://github.com/user-attachments/assets/3f754a3a-a9d3-4c31-a86f-f60770756fb7" />|
 |:--:|
 | *Central Dashboard: Real-time balance aggregation, activity charts, and recent transactions.* |
 
-| ![Bank Connection](https://via.placeholder.com/400x250?text=Insert+Plaid+Integration+Here) | ![Mobile View](https://via.placeholder.com/400x250?text=Insert+Mobile+UI+Here) |
+| <img width="1901" height="1204" alt="Снимок экрана 2026-04-09 в 22 48 54" src="https://github.com/user-attachments/assets/af8283bb-c810-4360-8145-c9307610446c" />
+ | ![Mobile View](https://via.placeholder.com/400x250?text=Insert+Mobile+UI+Here) |
 |:---:|:---:|
 | *Plaid Integration: Securely connect to 10,000+ banks.* | *Mobile-First Design: Fully responsive across all devices.* |
 
