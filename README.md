@@ -58,7 +58,7 @@ The platform is equipped with a full observability stack, allowing proactive det
 * **Loki:** Centralized log aggregation across all Docker containers.
 * **Sentry:** Real-time client-side and server-side error tracking.
 
-| ![Grafana Dashboard](https://via.placeholder.com/800x300?text=Insert+Grafana+Metrics+Screenshot+Here) |
+| <img width="1690" height="842" alt="Снимок экрана 2026-04-12 в 19 34 26" src="https://github.com/user-attachments/assets/13e65161-97ce-4cf2-9d1f-9640dcf7f12c" />|
 |:--:|
 | *System Health Dashboard: Request logging, CPU load, and error analytics.* |
 
