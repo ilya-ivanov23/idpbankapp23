@@ -76,6 +76,9 @@ The platform is equipped with a full observability stack, allowing proactive det
 
 ## 🗺️ Architectural Roadmap (Evolution to Polyglot Microservices)
 
+To handle massive scale and complex transactions, the system is currently evolving into an **Event-Driven Enterprise Architecture**:
+
+```mermaid
 graph TD
     %% Styling
     classDef frontend fill:#000,stroke:#333,stroke-width:2px,color:#fff
@@ -108,24 +111,3 @@ graph TD
     
     %% AI Flow
     API -.->|Fetch Private Insights| Gemma
-
----
-
-## 🚀 Local Development
-
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/ilya-ivanov23/idpbankapp23.git](https://github.com/ilya-ivanov23/idpbankapp23.git)
-    cd idpbankapp23
-    npm install
-    ```
-2.  **Infrastructure:**
-    The project infrastructure (Monitoring, Proxies) is Docker-ready:
-    ```bash
-    docker-compose up -d
-    ```
-3.  **Environment Variables:**
-    Configure the `.env` file using `.env.example` as a template (including Plaid, Appwrite, and Sentry keys).
-
----
-*Developed by Ilya Ivanov — Software Engineer / DevOps*
