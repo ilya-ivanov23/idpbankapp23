@@ -13,7 +13,7 @@
 ## 📸 Interface & UX
 *A seamless, distraction-free financial management experience.*
 
-| ![Main Dashboard](https://via.placeholder.com/800x450?text=Insert+Dashboard+Screenshot+Here) |
+| ![Main Dashboard](https://via.placeholder.com/800x450?text=<img width="1901" height="1204" alt="Снимок экрана 2026-04-09 в 22 47 57" src="https://github.com/user-attachments/assets/3f754a3a-a9d3-4c31-a86f-f60770756fb7" />) |
 |:--:|
 | *Central Dashboard: Real-time balance aggregation, activity charts, and recent transactions.* |
 
