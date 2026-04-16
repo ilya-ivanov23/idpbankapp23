@@ -11,6 +11,9 @@ jobs:
   test-and-lint:
     name: 🏗️ Test & Lint
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./bank_nextjs
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -69,7 +72,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./bank_nextjs
           push: true
           tags: ghcr.io/ilya-ivanov23/idpbankapp23:latest
           build-args: |
