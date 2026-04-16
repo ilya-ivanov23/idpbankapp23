@@ -108,7 +108,8 @@ jobs:
           host: ${{ secrets.GCP_HOST }}
           username: ${{ secrets.GCP_USERNAME }}
           key: ${{ secrets.GCP_SSH_KEY }}
-          source: monitoring/
+          source: bank_nextjs/monitoring/
+          strip_components: 1
           target: ~/idpbankapp23/
 
       - name: Deploy to GCP Server
