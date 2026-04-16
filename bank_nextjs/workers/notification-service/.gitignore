@@ -1,0 +1,5 @@
+node_modules/
+.env
+# --- IDP Bank Security & Secrets ---
+idpbank-infra/.env
+core-engine/src/main/resources/application.properties
