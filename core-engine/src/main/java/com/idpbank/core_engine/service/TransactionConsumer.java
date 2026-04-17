@@ -16,12 +16,13 @@ public class TransactionConsumer {
     // Specify the topic where the frontend/node sends transfers
     @KafkaListener(topics = "bank-transactions", groupId = "bank-core-group")
     public void consumeTransaction(TransactionEvent event) {
-        log.info("🚀 NEW TRANSFER RECEIVED FROM KAFKA!");
+        log.info("🚀 NEW TRANSFER RECEIVED FROM KAFKA: {}", event.getIdempotencyKey());
 
         try {
             transactionService.processTransfer(event);
         } catch (Exception e) {
-            log.error("Critical error processing transfer: {}", e.getMessage());
+            log.error("Critical error processing transfer {}: {}", event.getIdempotencyKey(), e.getMessage(), e);
+            throw e; // Rethrow to let Kafka handle retry or DLQ
         }
     }
 }

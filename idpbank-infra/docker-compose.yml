@@ -59,3 +59,16 @@ services:
       - bank-network
     volumes:
       - kafka-data:/tmp/kraft-combined-logs
+
+  bank-core:
+    image: ghcr.io/ilya-ivanov23/idpbankapp23-core-engine:latest
+    container_name: bank_core
+    restart: unless-stopped
+    depends_on:
+      - bank-postgres
+      - bank-kafka
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://bank-postgres:5432/idp_bank_db
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=bank-kafka:29092
+    networks:
+      - bank-network
