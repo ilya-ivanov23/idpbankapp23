@@ -69,6 +69,8 @@ services:
       - bank-kafka
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://bank-postgres:5432/idp_bank_db
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=bank-kafka:29092
     networks:
       - bank-network
