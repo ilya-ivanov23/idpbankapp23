@@ -22,49 +22,56 @@ public class TransactionService {
 
     @Transactional
     public void processTransfer(TransactionEvent event) {
-        log.info("Начинаем обработку транзакции: {}", event.getIdempotencyKey());
+        log.info("Starting transaction processing: {}", event.getIdempotencyKey());
 
-        // 1. Проверка на идемпотентность (защита от двойного клика)
+        // 1. Idempotency check (protection against double processing)
         if (transactionRepository.existsByIdempotencyKey(event.getIdempotencyKey())) {
-            log.warn("Транзакция {} уже была обработана! Игнорируем.", event.getIdempotencyKey());
+            log.warn("Transaction {} has already been processed! Ignoring.", event.getIdempotencyKey());
             return;
         }
 
-        // Создаем новую запись о транзакции
+        // Create a new transaction record
         Transaction tx = new Transaction();
         tx.setId(UUID.randomUUID());
         tx.setAmount(event.getAmount());
         tx.setIdempotencyKey(event.getIdempotencyKey());
 
-        // 2. Ищем счета в базе
-        Account fromAccount = accountRepository.findById(event.getFromAccountId())
-                .orElseThrow(() -> new RuntimeException("Счет отправителя не найден"));
-        Account toAccount = accountRepository.findById(event.getToAccountId())
-                .orElseThrow(() -> new RuntimeException("Счет получателя не найден"));
-
-        tx.setFromAccount(fromAccount);
+        // 2. Fetch receiver account with Pessimistic Lock
+        Account toAccount = accountRepository.findByIdForUpdate(event.getToAccountId())
+                .orElseThrow(() -> new IllegalArgumentException("Receiver account not found: " + event.getToAccountId()));
         tx.setToAccount(toAccount);
 
-        // 3. Проверяем баланс
-        if (fromAccount.getBalance().compareTo(event.getAmount()) < 0) {
-            log.error("Недостаточно средств на счете: {}", fromAccount.getId());
-            tx.setStatus("FAILED");
-            transactionRepository.save(tx);
-            return;
+        // 3. If it's a transfer (not a top-up), check sender
+        if (event.getFromAccountId() != null) {
+            Account fromAccount = accountRepository.findByIdForUpdate(event.getFromAccountId())
+                    .orElseThrow(() -> new IllegalArgumentException("Sender account not found: " + event.getFromAccountId()));
+            tx.setFromAccount(fromAccount);
+
+            // 4. Check balance
+            if (fromAccount.getBalance().compareTo(event.getAmount()) < 0) {
+                log.error("Insufficient funds in account: {}", fromAccount.getId());
+                tx.setStatus("FAILED");
+                transactionRepository.save(tx);
+                return;
+            }
+
+            // 5. Debit sender
+            fromAccount.setBalance(fromAccount.getBalance().subtract(event.getAmount()));
+            accountRepository.save(fromAccount);
+            log.info("Debited {} from sender account {}", event.getAmount(), fromAccount.getId());
+        } else {
+            // It's a deposit/top-up
+            log.info("From account is null. Executing as a deposit/top-up transaction.");
         }
 
-        // 4. Списание и зачисление
-        fromAccount.setBalance(fromAccount.getBalance().subtract(event.getAmount()));
+        // 6. Credit receiver
         toAccount.setBalance(toAccount.getBalance().add(event.getAmount()));
-
-        // 5. Сохраняем новые балансы и историю
-        accountRepository.save(fromAccount);
         accountRepository.save(toAccount);
 
         tx.setStatus("COMPLETED");
         transactionRepository.save(tx);
 
-        log.info("Успешный перевод! От {} к {} на сумму {}", fromAccount.getId(), toAccount.getId(), event.getAmount());
+        log.info("Successful transfer processed for amount {} to account {}", event.getAmount(), toAccount.getId());
     }
 }
 

@@ -46,3 +46,7 @@ next-env.d.ts
 # --- IDP Bank Security & Secrets ---
 idpbank-infra/.env
 core-engine/src/main/resources/application.properties
+
+# IDEs
+.idea/
+
