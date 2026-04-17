@@ -6,7 +6,7 @@ import java.util.UUID;
 
 @Data
 public class TransactionEvent {
-    private UUID fromAccountId; // Может быть null, если это пополнение с карты (Stripe)
+    private UUID fromAccountId; // May be null if this is a card top-up (Stripe)
     private UUID toAccountId;
     private BigDecimal amount;
     private String idempotencyKey;
