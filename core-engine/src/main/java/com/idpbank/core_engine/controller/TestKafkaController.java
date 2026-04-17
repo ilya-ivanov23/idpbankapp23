@@ -17,19 +17,18 @@ public class TestKafkaController {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    // Этот метод сработает, когда мы откроем http://localhost:8080/test-kafka в браузере
+    // This method will be triggered when we open http://localhost:8080/test-kafka in the browser
     @GetMapping("/test-kafka")
     public String sendTestMessage() {
         TransactionEvent event = new TransactionEvent();
         event.setFromAccountId(UUID.randomUUID());
         event.setToAccountId(UUID.randomUUID());
-        event.setAmount(new BigDecimal("150.00")); // Тестовая сумма перевода
+        event.setAmount(new BigDecimal("150.00")); // Test transfer amount
         event.setIdempotencyKey("TEST-" + UUID.randomUUID().toString());
 
-        // Отправляем сообщение в Кафку
+        // Sends a message to Kafka
         kafkaTemplate.send("bank-transactions", event);
 
-        return "✅ Тестовый перевод отправлен в Kafka! Загляни в консоль IntelliJ IDEA.";
+        return "✅ Test transfer sent to Kafka! Check the IntelliJ IDEA console.";
     }
 }
-
