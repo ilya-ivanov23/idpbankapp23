@@ -12,7 +12,7 @@ export class AuthController {
         return res.status(400).json({ error: 'Missing credentials or deviceId' });
       }
 
-      const userId = username; // Мок-логика
+      const userId = username; // Mock logic — replace with real credential lookup
       const tokens = await authService.login(userId, deviceId);
 
       return res.status(200).json(tokens);

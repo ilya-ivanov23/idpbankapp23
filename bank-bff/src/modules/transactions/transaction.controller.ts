@@ -7,9 +7,9 @@ export class TransactionController {
   async transfer(req: Request, res: Response) {
     try {
       const { toAccount, amount, currency } = req.body;
-      const { userId } = (req as any).user; // Инжектируется нашим authGuard
+      const { userId } = (req as any).user; // Injected by authGuard middleware
 
-      // Валидация входных данных
+      // Validate request payload
       if (!toAccount || !amount || !currency) {
         return res.status(400).json({ error: 'Missing required fields: toAccount, amount, currency' });
       }
@@ -18,11 +18,11 @@ export class TransactionController {
         return res.status(400).json({ error: 'Amount must be greater than zero' });
       }
 
-      // Формируем событие и бросаем в Kafka
+      // Build and publish the transfer event to Kafka
       const { eventId } = await transactionService.publishTransferEvent(userId, toAccount, amount, currency);
 
-      // Возвращаем 202 Accepted (API-First FinTech Standarad)
-      // Сервер принял запрос, но обработка происходит асинхронно
+      // Return 202 Accepted (API-First FinTech standard)
+      // The server has accepted the request; processing happens asynchronously
       return res.status(202).json({
         message: 'Transfer accepted for processing',
         eventId,

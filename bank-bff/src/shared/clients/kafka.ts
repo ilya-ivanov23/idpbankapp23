@@ -6,10 +6,10 @@ export const kafka = new Kafka({
   brokers: env.KAFKA_BROKERS,
 });
 
-// Создаем продюсера с включенной идемпотентностью (чтобы избежать дублей при сетевых ретраях)
+// Create a producer with idempotency enabled to prevent duplicate messages on network retries
 export const producer = kafka.producer({
   idempotent: true,
-  maxInFlightRequests: 1, // Требуется для строгой гарантии порядка при idempotent: true
+  maxInFlightRequests: 1, // Required to guarantee strict ordering when idempotent: true
 });
 
 export const connectKafka = async () => {

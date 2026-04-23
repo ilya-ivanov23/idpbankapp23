@@ -5,7 +5,7 @@ import { authGuard } from '../../shared/middleware/auth.middleware';
 const router = Router();
 const transactionController = new TransactionController();
 
-// Обрати внимание: Мы навесили authGuard. Этот роут защищен!
+// This route is protected by authGuard middleware — a valid JWT is required
 router.post('/transfer', authGuard, transactionController.transfer);
 
 export default router;

@@ -19,6 +19,7 @@
     "jsonwebtoken": "^9.0.3",
     "kafkajs": "^2.2.4",
     "redis": "^5.12.1",
+    "stripe": "^22.0.2",
     "uuid": "^14.0.0"
   },
   "devDependencies": {
