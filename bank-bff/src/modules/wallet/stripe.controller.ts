@@ -28,7 +28,7 @@ export class StripeController {
       );
     } catch (error: any) {
       console.error('Webhook signature verification failed:', error.message);
-      return res.status(400).send(`Webhook Error: ${error.message}`);
+      return res.status(400).send('Webhook signature verification failed');
     }
 
     // 2. Обработка нужного события
@@ -45,9 +45,10 @@ export class StripeController {
       const amount = session.amount_total; // Stripe возвращает в центах
       const currency = session.currency?.toUpperCase();
 
-      if (userId && amount && currency) {
+      if (userId && amount !== undefined && amount !== null && currency) {
         // 3. Интеграция с Kafka (Producer)
-        const eventId = uuidv4();
+        // Используем event.id от Stripe для 100% идемпотентности, чтобы не задвоить баланс при ретраях от Stripe
+        const eventId = event.id;
         const payload = {
           eventId,
           userId,
