@@ -5,7 +5,7 @@ import { env } from '../../config/env';
 import { producer } from '../../shared/clients/kafka';
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-02-24.acacia',
+  apiVersion: '2026-03-25.dahlia' as any,
 });
 
 export class StripeController {
@@ -17,7 +17,7 @@ export class StripeController {
       return res.status(400).send('Missing stripe-signature header');
     }
 
-    let event: Stripe.Event;
+    let event: any;
 
     try {
       // 1. Валидация подписи (Security)
@@ -33,7 +33,7 @@ export class StripeController {
 
     // 2. Обработка нужного события
     if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.Checkout.Session;
+      const session = event.data.object as any;
 
       // КРИТИЧЕСКАЯ ПРОВЕРКА: Убеждаемся, что деньги реально списаны (защита от async payments)
       if (session.payment_status !== 'paid') {
