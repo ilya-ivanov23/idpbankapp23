@@ -8,6 +8,58 @@ const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
 });
 
 export class StripeController {
+  /**
+   * POST /api/wallet/checkout
+   * Creates a Stripe Checkout Session and returns the hosted payment URL.
+   * The frontend redirects the user to this URL to complete payment.
+   */
+  async createCheckoutSession(req: Request, res: Response) {
+    const userId = (req as any).user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { amount, currency = 'usd' } = req.body;
+
+    if (!amount || typeof amount !== 'number' || !Number.isFinite(amount) || amount <= 0) {
+      return res.status(400).json({ error: 'Amount must be a positive finite number' });
+    }
+
+    try {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'payment',
+        // Pass userId so our webhook knows which user to credit
+        client_reference_id: userId,
+        line_items: [
+          {
+            price_data: {
+              currency,
+              unit_amount: Math.round(amount * 100), // Convert to cents
+              product_data: {
+                name: 'Wallet Top-Up',
+                description: `Adding ${currency.toUpperCase()} ${amount} to your IDP Bank wallet`,
+              },
+            },
+            quantity: 1,
+          },
+        ],
+        // Stripe will redirect the user here after payment
+        success_url: `${process.env.FRONTEND_URL}/wallet?payment=success`,
+        cancel_url: `${process.env.FRONTEND_URL}/wallet?payment=cancelled`,
+      } as any);
+
+      return res.status(200).json({ url: session.url });
+    } catch (error: any) {
+      console.error('Failed to create Stripe checkout session:', error.message);
+      return res.status(500).json({ error: 'Failed to initiate payment' });
+    }
+  }
+
+  /**
+   * POST /api/wallet/webhook
+   * Receives Stripe webhook events and publishes deposit events to Kafka.
+   */
   async webhook(req: Request, res: Response) {
     const sig = req.headers['stripe-signature'];
     const signature = Array.isArray(sig) ? sig[0] : sig;
