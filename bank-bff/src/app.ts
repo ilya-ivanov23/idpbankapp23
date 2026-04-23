@@ -4,10 +4,16 @@ import helmet from 'helmet';
 
 import authRoutes from './modules/auth/auth.routes';
 import transactionRoutes from './modules/transactions/transaction.routes';
+import stripeRoutes from './modules/wallet/stripe.routes';
 
 const app: Express = express();
 app.use(helmet());
 app.use(cors());
+
+// ВНИМАНИЕ: Роуты Stripe должны быть подключены ДО `app.use(express.json())`!
+// Иначе `express.json()` распарсит тело в объект, и валидация подписи упадет.
+app.use('/api/wallet', stripeRoutes);
+
 app.use(express.json());
 
 // Routes
