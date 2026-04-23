@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
-import { v4 as uuidv4 } from 'uuid';
 import { env } from '../../config/env';
 import { producer } from '../../shared/clients/kafka';
 
@@ -12,7 +11,7 @@ export class StripeController {
   async webhook(req: Request, res: Response) {
     const sig = req.headers['stripe-signature'];
     const signature = Array.isArray(sig) ? sig[0] : sig;
-    
+
     if (!signature) {
       return res.status(400).send('Missing stripe-signature header');
     }
@@ -20,9 +19,9 @@ export class StripeController {
     let event: any;
 
     try {
-      // 1. Валидация подписи (Security)
+      // 1. Validate Stripe signature (guards against forged webhook requests)
       event = stripe.webhooks.constructEvent(
-        req.body, // Здесь должен быть сырой Buffer (Raw Body)
+        req.body, // Must be the raw Buffer, not a parsed JSON object
         signature,
         env.STRIPE_WEBHOOK_SECRET
       );
@@ -31,28 +30,30 @@ export class StripeController {
       return res.status(400).send('Webhook signature verification failed');
     }
 
-    // 2. Обработка нужного события
+    // 2. Handle the payment event
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as any;
 
-      // КРИТИЧЕСКАЯ ПРОВЕРКА: Убеждаемся, что деньги реально списаны (защита от async payments)
+      // CRITICAL CHECK: Ensure the payment is fully settled before crediting the user.
+      // 'checkout.session.completed' fires for async methods (e.g. SEPA) before money is received.
       if (session.payment_status !== 'paid') {
-        console.log(`Payment for session ${session.id} is not yet paid. Status: ${session.payment_status}`);
+        console.log(`Payment for session ${session.id} is not yet settled. Status: ${session.payment_status}`);
         return res.status(200).send();
       }
 
       const userId = session.client_reference_id;
-      const amount = session.amount_total; // Stripe возвращает в центах
+      const amount = session.amount_total; // Stripe amounts are in the smallest currency unit (cents)
       const currency = session.currency?.toUpperCase();
 
       if (userId && amount !== undefined && amount !== null && currency) {
-        // 3. Интеграция с Kafka (Producer)
-        // Используем event.id от Stripe для 100% идемпотентности, чтобы не задвоить баланс при ретраях от Stripe
+        // 3. Publish to Kafka
+        // Using event.id from Stripe as the stable eventId guarantees idempotency:
+        // if Stripe retries the webhook, the same event.id prevents double-crediting.
         const eventId = event.id;
         const payload = {
           eventId,
           userId,
-          amount: amount / 100, // Конвертируем центы в нормальную валюту
+          amount: amount / 100, // Convert from cents to the base currency unit
           currency,
           timestamp: new Date().toISOString(),
           type: 'DEPOSIT_COMPLETED'
@@ -63,7 +64,7 @@ export class StripeController {
             topic: 'bank-transactions',
             messages: [
               {
-                key: userId, // Партицирование по userId для сохранения порядка!
+                key: userId, // Partition by userId to guarantee per-user event ordering
                 value: JSON.stringify(payload)
               }
             ]
@@ -74,11 +75,11 @@ export class StripeController {
           return res.status(500).send('Internal Server Error');
         }
       } else {
-        console.warn('Checkout completed but missing vital metadata (userId, amount, currency)');
+        console.warn('Checkout completed but missing required metadata (userId, amount, currency)');
       }
     }
 
-    // 4. Обязательный статус 200, чтобы Stripe знал, что мы всё получили
+    // 4. Always respond 200 so Stripe knows the webhook was received successfully
     res.status(200).send();
   }
 }
