@@ -6,13 +6,21 @@ for (const key of requiredKeys) {
     throw new Error(`Environment variable ${key} is missing in .env!`);
   }
 }
-
+const parsePort = (value: string | undefined): number => {
+  const port = Number(value);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error(`Invalid PORT: ${value}`);
+  }
+  return port;
+};
 export const env = {
-  PORT: process.env.PORT,
+  PORT: parsePort(process.env.PORT),
   NODE_ENV: process.env.NODE_ENV,
   JWT_SECRET: process.env.JWT_SECRET as string,
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET as string,
   REDIS_URL: process.env.REDIS_URL as string,
-  KAFKA_BROKERS: (process.env.KAFKA_BROKERS as string).split(','),
+  KAFKA_BROKERS: (process.env.KAFKA_BROKERS as string)
+    .split(',')
+    .map(b => b.trim())
+    .filter(b => b.length > 0),
 };
-
