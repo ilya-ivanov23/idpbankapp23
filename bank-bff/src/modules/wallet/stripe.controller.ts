@@ -10,7 +10,8 @@ const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
 
 export class StripeController {
   async webhook(req: Request, res: Response) {
-    const signature = req.headers['stripe-signature'];
+    const sig = req.headers['stripe-signature'];
+    const signature = Array.isArray(sig) ? sig[0] : sig;
     
     if (!signature) {
       return res.status(400).send('Missing stripe-signature header');
@@ -33,6 +34,12 @@ export class StripeController {
     // 2. Обработка нужного события
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      // КРИТИЧЕСКАЯ ПРОВЕРКА: Убеждаемся, что деньги реально списаны (защита от async payments)
+      if (session.payment_status !== 'paid') {
+        console.log(`Payment for session ${session.id} is not yet paid. Status: ${session.payment_status}`);
+        return res.status(200).send();
+      }
 
       const userId = session.client_reference_id;
       const amount = session.amount_total; // Stripe возвращает в центах
