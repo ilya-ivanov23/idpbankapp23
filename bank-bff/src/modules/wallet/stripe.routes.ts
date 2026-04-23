@@ -4,7 +4,7 @@ import { StripeController } from './stripe.controller';
 const router = Router();
 const stripeController = new StripeController();
 
-// ВАЖНО: Используем express.raw, потому что Stripe валидирует подпись по сырому телу запроса
+// IMPORTANT: Using express.raw() because Stripe validates its signature against the raw request body
 router.post(
   '/webhook',
   express.raw({ type: 'application/json' }),

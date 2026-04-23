@@ -5,7 +5,7 @@ export class TransactionService {
   async publishTransferEvent(userId: string, toAccount: string, amount: number, currency: string) {
     const eventId = uuidv4();
 
-    // Формируем payload для микросервиса Core
+    // Build the event payload for the Core microservice
     const payload = {
       eventId,
       userId,
@@ -20,7 +20,7 @@ export class TransactionService {
       topic: 'bank-transactions',
       messages: [
         {
-          key: userId, // Используем userId как ключ партиции, чтобы все транзакции юзера шли по порядку
+          key: userId, // Partition by userId to guarantee per-user transaction ordering
           value: JSON.stringify(payload)
         }
       ]

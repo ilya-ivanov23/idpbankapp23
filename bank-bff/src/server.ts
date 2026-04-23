@@ -6,7 +6,7 @@ import { connectKafka } from './shared/clients/kafka';
 const startServer = async () => {
   try {
     await connectRedis();
-    await connectKafka(); // Подключаем Kafka Producer при старте
+    await connectKafka(); // Connect Kafka producer before accepting requests
     app.listen(env.PORT, () => {
       console.log(`Server is running on port ${env.PORT}`);
     });

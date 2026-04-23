@@ -10,8 +10,8 @@ const app: Express = express();
 app.use(helmet());
 app.use(cors());
 
-// ВНИМАНИЕ: Роуты Stripe должны быть подключены ДО `app.use(express.json())`!
-// Иначе `express.json()` распарсит тело в объект, и валидация подписи упадет.
+// IMPORTANT: Stripe routes must be registered BEFORE `app.use(express.json())`!
+// Otherwise express.json() will parse the body into an object and Stripe signature verification will fail.
 app.use('/api/wallet', stripeRoutes);
 
 app.use(express.json());
