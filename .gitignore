@@ -50,3 +50,8 @@ core-engine/src/main/resources/application.properties
 # IDEs
 .idea/
 
+
+# Reports
+REPORT_BFF.md
+REPORT_JAVA.md
+google_ai_studio_context.md
