@@ -41,6 +41,12 @@ public class ExchangeService {
         if (request.getFromAccountId().equals(request.getToAccountId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot exchange within the same account");
         }
+        if (request.getAmountToDebit().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount to debit must be positive");
+        }
+        if (request.getExchangeRate().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exchange rate must be positive");
+        }
 
         // Always lock in a consistent order to prevent deadlocks (e.g. by UUID)
         UUID firstLock = request.getFromAccountId().compareTo(request.getToAccountId()) < 0 ? request.getFromAccountId() : request.getToAccountId();

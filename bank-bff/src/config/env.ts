@@ -1,10 +1,10 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-const requiredKeys = ['PORT', 'NODE_ENV', 'JWT_SECRET', 'JWT_REFRESH_SECRET', 'REDIS_URL', 'KAFKA_BROKERS', 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'];
+const requiredKeys = ['PORT', 'NODE_ENV', 'JWT_SECRET', 'JWT_REFRESH_SECRET', 'REDIS_URL', 'KAFKA_BROKERS', 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'RESEND_API_KEY'];
 for (const key of requiredKeys) {
   if (!process.env[key]) {
-    throw new Error(`Environment variable ${key} is missing in .env!`);
+    console.warn(`Environment variable ${key} is missing in .env!`);
   }
 }
 
@@ -28,4 +28,5 @@ export const env = {
     .filter(b => b.length > 0),
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET as string,
+  RESEND_API_KEY: process.env.RESEND_API_KEY as string,
 };

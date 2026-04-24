@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
     boolean existsByIdempotencyKey(String idempotencyKey);
 
-    @Query("SELECT t FROM Transaction t LEFT JOIN t.fromAccount fa LEFT JOIN t.toAccount ta WHERE (fa.userId = :userId OR ta.userId = :userId) ORDER BY t.createdAt DESC")
+    @Query("SELECT DISTINCT t FROM Transaction t LEFT JOIN FETCH t.fromAccount fa LEFT JOIN FETCH t.toAccount ta WHERE (fa.userId = :userId OR ta.userId = :userId) ORDER BY t.createdAt DESC")
     List<Transaction> findTransactionsByUserId(@Param("userId") UUID userId);
 }
 

@@ -16,9 +16,12 @@ app.use('/api/wallet', stripeRoutes);
 
 app.use(express.json());
 
+import cryptoRoutes from './modules/wallet/crypto.routes';
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/crypto', cryptoRoutes);
 
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'OK' });
