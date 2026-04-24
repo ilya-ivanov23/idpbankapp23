@@ -19,8 +19,8 @@ public class InternalUserController {
         return ResponseEntity.ok(userService.createUser(dto));
     }
 
-    @GetMapping("/{email}")
-    public ResponseEntity<UserResponseDto> getUserByEmail(@PathVariable String email) {
+    @GetMapping
+    public ResponseEntity<UserResponseDto> getUserByEmail(@RequestParam String email) {
         return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 }

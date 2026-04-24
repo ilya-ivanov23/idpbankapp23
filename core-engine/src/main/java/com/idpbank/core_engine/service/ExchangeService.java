@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.UUID;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +33,13 @@ public class ExchangeService {
         if (transactionRepository.existsByIdempotencyKey(request.getIdempotencyKey())) {
             log.warn("Exchange {} already processed", request.getIdempotencyKey());
             return;
+        }
+
+        if (request.getFromAccountId() == null || request.getToAccountId() == null || request.getExchangeRate() == null || request.getAmountToDebit() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required fields for exchange");
+        }
+        if (request.getFromAccountId().equals(request.getToAccountId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot exchange within the same account");
         }
 
         // Always lock in a consistent order to prevent deadlocks (e.g. by UUID)

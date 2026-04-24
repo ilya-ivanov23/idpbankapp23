@@ -11,3 +11,7 @@ ALTER TABLE accounts RENAME COLUMN currency TO currency_code;
 -- Update transactions table
 ALTER TABLE transactions ADD COLUMN type VARCHAR(50) NOT NULL DEFAULT 'TRANSFER';
 ALTER TABLE transactions ADD COLUMN stripe_event_id VARCHAR(255) UNIQUE;
+
+-- Adjust numeric precision for crypto support
+ALTER TABLE accounts ALTER COLUMN balance TYPE DECIMAL(19, 8);
+ALTER TABLE transactions ALTER COLUMN amount TYPE DECIMAL(19, 8);

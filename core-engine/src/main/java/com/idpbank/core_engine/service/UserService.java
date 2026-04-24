@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -22,7 +23,7 @@ public class UserService {
         log.info("Creating new user with email: {}", dto.getEmail());
         
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("User with this email already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User with this email already exists");
         }
 
         User user = new User();
@@ -41,7 +42,7 @@ public class UserService {
 
     public UserResponseDto getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + email));
         return mapToDto(user);
     }
 
