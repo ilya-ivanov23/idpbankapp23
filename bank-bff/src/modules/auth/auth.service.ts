@@ -1,12 +1,12 @@
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { env } from '../../config/env';
 import { redisClient } from '../../shared/clients/redis';
 import { sendOtpEmail } from '../../shared/clients/email';
 
 export class AuthService {
   async login(userId: string, deviceId: string) {
-    const jti = uuidv4();
+    const jti = crypto.randomUUID();
 
     const accessToken = jwt.sign(
       { userId, deviceId },
