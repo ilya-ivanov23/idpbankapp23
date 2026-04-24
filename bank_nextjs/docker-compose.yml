@@ -1,94 +1,89 @@
 version: '3.8'
 
 services:
-  # 1. Bank storage (S3) for PDF receipts and personal data
-  minio:
-    image: minio/minio:latest
-    container_name: bank_s3_storage
-    ports:
-      - "9000:9000" # API port (for backend code)
-      - "9001:9001" # Web UI port (for managing buckets in the browser)
-    environment:
-      MINIO_ROOT_USER: "bank_admin"
-      MINIO_ROOT_PASSWORD: "bank_secure_password_123"
-    command: server /data --console-address ":9001"
-    volumes:
-      - minio_data:/data
+  # 1. Твой основной сайт (Next.js)
+  bank_app:
+    image: ghcr.io/ilya-ivanov23/idpbankapp23:latest
+    container_name: bank_nextjs
+    expose:
+      - "3000"
+    env_file:
+      - .env
     restart: always
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
+    depends_on:
+      - kafka
     networks:
       - bank_network
 
-  # 3. Kafka - event broker for Event-Driven Architecture (SCRUM-67, SCRUM-68)
-  # KRaft mode: modern Kafka 3.x+ without Zookeeper
+  # 2. Caddy - прокси и HTTPS
+  caddy:
+    image: caddy:latest
+    container_name: caddy_proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - bank_app
+    networks:
+      - bank_network
+
+  # 3. Kafka (Брокер сообщений)
   kafka:
     image: confluentinc/cp-kafka:latest
     container_name: bank_kafka
     ports:
       - "9092:9092"
     environment:
-      # KRaft mode - this node is both broker and controller
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      # SCRUM-68: Dual-listener setup
-      # PLAINTEXT      - for internal Docker container communication (kafka:29092)
-      # PLAINTEXT_HOST - for Next.js running locally on Mac (localhost:9092)
-      # CONTROLLER     - for KRaft internal quorum communication
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://34.74.252.2:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      # Unique cluster ID (base64 encoded UUID, required for KRaft)
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_HEAP_OPTS: "-Xmx256M -Xms256M"
     volumes:
       - kafka_data:/var/lib/kafka/data
     restart: always
     networks:
       - bank_network
 
-  # 2. Reverse Proxy (NGINX) - load balancer and static files optimizer (Gzip)
-  nginx:
-    image: nginx:alpine
-    container_name: bank_api_gateway
+  # 4. Loki - Хранилище логов
+  loki:
+    image: grafana/loki:latest
+    container_name: bank_loki
     ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      minio:
-        condition: service_healthy
-    extra_hosts:
-      - "host.docker.internal:host-gateway"  # Allows NGINX to "see" Next.js on your Mac
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
     restart: always
     networks:
       - bank_network
 
-  # 5. Promtail - ships container logs → Grafana Cloud Loki (SCRUM-91)
+  # 5. Promtail - Агент сбора логов
   promtail:
     image: grafana/promtail:latest
     container_name: bank_promtail
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - ./monitoring/promtail-config.yaml:/etc/promtail/config.yml:ro
     command: -config.file=/etc/promtail/config.yml -config.expand-env=true
-    environment:
-      - LOKI_URL=${LOKI_URL}
-      - LOKI_USER=${LOKI_USER}
-      - LOKI_PASSWORD=${LOKI_PASSWORD}
     restart: always
     networks:
       - bank_network
 
-  # 6. Node Exporter - exposes host metrics (CPU, RAM, Disk) for Prometheus (SCRUM-92)
+  # 6. Node Exporter - Метрики системы
   node-exporter:
     image: prom/node-exporter:latest
     container_name: bank_node_exporter
@@ -105,7 +100,7 @@ services:
     networks:
       - bank_network
 
-  # 7. Grafana Alloy - scrapes metrics and ships them → Grafana Cloud (SCRUM-90)
+  # 7. Grafana Alloy - Метрики в Grafana Cloud
   alloy:
     image: grafana/alloy:latest
     container_name: bank_alloy
@@ -121,8 +116,24 @@ services:
     networks:
       - bank_network
 
+  notification_service:
+    image: node:18-alpine
+    container_name: notification_service
+    working_dir: /app
+    volumes:
+      - ./workers/notification-service:/app
+      - /etc/localtime:/etc/localtime:ro
+    command: sh -c "npm install && npm start"
+    env_file:
+      - .env
+    depends_on:
+      - kafka
+    networks:
+      - bank_network
+
 volumes:
-  minio_data:
+  caddy_data:
+  caddy_config:
   kafka_data:
 
 networks:
