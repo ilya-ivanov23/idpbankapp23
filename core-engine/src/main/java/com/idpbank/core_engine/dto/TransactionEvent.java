@@ -10,5 +10,7 @@ public class TransactionEvent {
     private UUID toAccountId;
     private BigDecimal amount;
     private String idempotencyKey;
+    private String type; // TRANSFER, DEPOSIT, EXCHANGE
+    private String stripeEventId;
 }
 

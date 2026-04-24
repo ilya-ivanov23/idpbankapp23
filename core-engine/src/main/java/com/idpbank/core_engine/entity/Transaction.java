@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -13,6 +14,7 @@ import java.util.UUID;
 @Setter
 public class Transaction {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @ManyToOne
@@ -26,9 +28,18 @@ public class Transaction {
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
+    @Column(name = "type", nullable = false)
+    private String type = "TRANSFER";
+
     @Column(name = "status", nullable = false)
     private String status;
 
     @Column(name = "idempotency_key", nullable = false, unique = true)
     private String idempotencyKey;
+
+    @Column(name = "stripe_event_id", unique = true)
+    private String stripeEventId;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

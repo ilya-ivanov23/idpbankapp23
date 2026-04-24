@@ -32,9 +32,11 @@ public class TransactionService {
 
         // Create a new transaction record
         Transaction tx = new Transaction();
-        tx.setId(UUID.randomUUID());
+        // tx.setId(UUID.randomUUID()); // handled by JPA
         tx.setAmount(event.getAmount());
         tx.setIdempotencyKey(event.getIdempotencyKey());
+        tx.setType(event.getType() != null ? event.getType() : "TRANSFER");
+        tx.setStripeEventId(event.getStripeEventId());
 
         // 2. Fetch receiver account with Pessimistic Lock
         Account toAccount = accountRepository.findByIdForUpdate(event.getToAccountId())
