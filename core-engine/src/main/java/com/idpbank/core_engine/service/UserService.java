@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import org.springframework.dao.DataIntegrityViolationException;
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -31,8 +32,13 @@ public class UserService {
         user.setPasswordHash(dto.getPasswordHash());
         user.setPinHash(dto.getPinHash());
         user.setStripeCustomerId(dto.getStripeCustomerId());
-        
-        user = userRepository.save(user);
+
+        try {
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            // Handles race condition where two requests register the same email simultaneously
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User with this email or Stripe ID already exists");
+        }
 
         // Auto-create a default FIAT USD account for the new user
         accountService.createAccount(user.getId(), "FIAT", "USD");
