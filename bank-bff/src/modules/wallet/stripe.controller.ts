@@ -27,7 +27,7 @@ export class StripeController {
 
     try {
       const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
+        payment_method_types: ['card', 'blik'],
         mode: 'payment',
         // Pass userId so our webhook knows which user to credit
         client_reference_id: userId,
