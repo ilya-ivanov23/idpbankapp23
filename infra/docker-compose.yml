@@ -9,9 +9,9 @@ services:
     container_name: bank_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: idp_admin
-      POSTGRES_PASSWORD: idp_secret_2026
-      POSTGRES_DB: idp_bank_db
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "127.0.0.1:5432:5432" # Защищено: только для SSH-туннеля
     volumes:
@@ -135,7 +135,7 @@ services:
     restart: unless-stopped
     environment:
       - PORT=3000
-      - DATABASE_URL=postgresql://idp_admin:idp_secret_2026@bank-postgres:5432/idp_bank_db
+      - DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@bank-postgres:5432/${DB_NAME}
       - REDIS_URL=redis://bank-redis:6379
       - KAFKA_BROKERS=bank-kafka:29092
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
@@ -162,9 +162,9 @@ services:
       # Активируем docker-профиль (читает application-docker.properties)
       - SPRING_PROFILES_ACTIVE=docker
       # Секреты БД
-      - DATABASE_URL=jdbc:postgresql://bank-postgres:5432/idp_bank_db
-      - DB_USERNAME=idp_admin
-      - DB_PASSWORD=idp_secret_2026
+      - DATABASE_URL=jdbc:postgresql://bank-postgres:5432/${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
       # Kafka внутри docker-сети
       - KAFKA_BROKERS=bank-kafka:29092
     networks:
