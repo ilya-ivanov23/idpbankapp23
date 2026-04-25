@@ -30,14 +30,16 @@ app.use(
     target: env.JAVA_CORE_URL,
     changeOrigin: true,
     // Manually fix request body for http-proxy-middleware v3
-    onProxyReq: (proxyReq, req: any) => {
-      if (req.body && Object.keys(req.body).length) {
-        const bodyData = JSON.stringify(req.body);
-        proxyReq.setHeader('Content-Type', 'application/json');
-        proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
-        proxyReq.write(bodyData);
+    on: {
+      proxyReq: (proxyReq: any, req: any) => {
+        if (req.body && Object.keys(req.body).length) {
+          const bodyData = JSON.stringify(req.body);
+          proxyReq.setHeader('Content-Type', 'application/json');
+          proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+          proxyReq.write(bodyData);
+        }
       }
-    },
+    }
   })
 );
 
