@@ -29,7 +29,7 @@ app.use('/api/crypto', cryptoRoutes);
 app.use(
   createProxyMiddleware({
     pathFilter: '/api/internal', 
-    target: env.JAVA_CORE_URL,
+    target: env.JAVA_CORE_URL,  
     changeOrigin: true,
   })
 );
