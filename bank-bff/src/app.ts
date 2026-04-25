@@ -26,8 +26,9 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/crypto', cryptoRoutes);
 
 // Proxy all requests starting with /api/internal to the Java Core engine
-app.use('/api/internal',
+app.use(
   createProxyMiddleware({
+    pathFilter: '/api/internal', 
     target: env.JAVA_CORE_URL,
     changeOrigin: true,
   })
