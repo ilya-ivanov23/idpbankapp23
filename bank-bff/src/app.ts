@@ -7,6 +7,7 @@ import transactionRoutes from './modules/transactions/transaction.routes';
 import stripeRoutes from './modules/wallet/stripe.routes';
 import { env } from './config/env';
 
+
 const app: Express = express();
 app.use(helmet());
 app.use(cors());
@@ -18,7 +19,7 @@ app.use('/api/wallet', stripeRoutes);
 app.use(express.json());
 
 import cryptoRoutes from './modules/wallet/crypto.routes';
-import { createProxyMiddleware } from 'http-proxy-middleware';
+import { createProxyMiddleware, fixRequestBody } from 'http-proxy-middleware';
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -28,9 +29,11 @@ app.use('/api/crypto', cryptoRoutes);
 // Proxy all requests starting with /api/internal to the Java Core engine
 app.use(
   createProxyMiddleware({
-    pathFilter: '/api/internal', 
-    target: env.JAVA_CORE_URL,  
+    pathFilter: '/api/internal',
+    target: env.JAVA_CORE_URL,
     changeOrigin: true,
+    // ВАЖНО: Эта строка лечит 408 таймаут и I/O ошибки!
+    onProxyReq: fixRequestBody, 
   })
 );
 
