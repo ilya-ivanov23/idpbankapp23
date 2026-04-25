@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import authRoutes from './modules/auth/auth.routes';
 import transactionRoutes from './modules/transactions/transaction.routes';
 import stripeRoutes from './modules/wallet/stripe.routes';
+import { env } from './config/env';
 
 const app: Express = express();
 app.use(helmet());
@@ -25,11 +26,11 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/crypto', cryptoRoutes);
 
 // Proxy all requests starting with /api/internal to the Java Core engine
-app.use(
-  '/api/internal',
+app.use('/api/internal',
   createProxyMiddleware({
-    target: process.env.JAVA_CORE_URL || 'http://localhost:8080',
+    target: env.JAVA_CORE_URL,
     changeOrigin: true,
+    pathFilter: '/api/internal',
   })
 );
 
