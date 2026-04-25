@@ -30,7 +30,6 @@ app.use('/api/internal',
   createProxyMiddleware({
     target: env.JAVA_CORE_URL,
     changeOrigin: true,
-    pathFilter: '/api/internal',
   })
 );
 
