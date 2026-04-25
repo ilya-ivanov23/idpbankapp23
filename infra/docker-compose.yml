@@ -139,7 +139,10 @@ services:
       - REDIS_URL=redis://bank-redis:6379 # Используем локальный Redis из этой же сети
       - KAFKA_BROKERS=bank-kafka:29092
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - RESEND_API_KEY=${RESEND_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       - JAVA_CORE_URL=http://bank-core:8080 # Имя сервиса из твоего compose
     networks:
       - bank-network
