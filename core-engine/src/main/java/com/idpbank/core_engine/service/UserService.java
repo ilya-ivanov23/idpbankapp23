@@ -119,47 +119,59 @@ public class UserService {
 
     @Transactional
     protected void grantWelcomeBonus(User user) {
-        // USD
+        // Create accounts first
         accountService.createAccount(user.getId(), "FIAT", "USD");
-        Account usd = accountRepository.findByUserId(user.getId()).stream().filter(a -> a.getCurrencyCode().equals("USD")).findFirst().get();
+        accountService.createAccount(user.getId(), "FIAT", "PLN");
+        accountService.createAccount(user.getId(), "FIAT", "EUR");
+        accountService.createAccount(user.getId(), "CRYPTO", "BTC");
+        accountService.createAccount(user.getId(), "CRYPTO", "ETH");
+        accountService.createAccount(user.getId(), "STOCK", "AAPL");
+
+        // Fetch all accounts once to avoid N+1 queries
+        java.util.List<Account> accounts = accountRepository.findByUserId(user.getId());
+
+        // USD
+        Account usd = findAccountByCurrency(accounts, "USD");
         usd.setBalance(BONUS_USD);
         accountRepository.save(usd);
         saveInitialDeposit(usd, BONUS_USD);
 
         // PLN
-        accountService.createAccount(user.getId(), "FIAT", "PLN");
-        Account pln = accountRepository.findByUserId(user.getId()).stream().filter(a -> a.getCurrencyCode().equals("PLN")).findFirst().get();
+        Account pln = findAccountByCurrency(accounts, "PLN");
         pln.setBalance(BONUS_PLN);
         accountRepository.save(pln);
         saveInitialDeposit(pln, BONUS_PLN);
 
         // EUR
-        accountService.createAccount(user.getId(), "FIAT", "EUR");
-        Account eur = accountRepository.findByUserId(user.getId()).stream().filter(a -> a.getCurrencyCode().equals("EUR")).findFirst().get();
+        Account eur = findAccountByCurrency(accounts, "EUR");
         eur.setBalance(BONUS_EUR);
         accountRepository.save(eur);
         saveInitialDeposit(eur, BONUS_EUR);
 
         // BTC
-        accountService.createAccount(user.getId(), "CRYPTO", "BTC");
-        Account btc = accountRepository.findByUserId(user.getId()).stream().filter(a -> a.getCurrencyCode().equals("BTC")).findFirst().get();
+        Account btc = findAccountByCurrency(accounts, "BTC");
         btc.setBalance(BONUS_BTC);
         accountRepository.save(btc);
         saveInitialDeposit(btc, BONUS_BTC);
 
         // ETH
-        accountService.createAccount(user.getId(), "CRYPTO", "ETH");
-        Account eth = accountRepository.findByUserId(user.getId()).stream().filter(a -> a.getCurrencyCode().equals("ETH")).findFirst().get();
+        Account eth = findAccountByCurrency(accounts, "ETH");
         eth.setBalance(BONUS_ETH);
         accountRepository.save(eth);
         saveInitialDeposit(eth, BONUS_ETH);
 
-        // AAPL (Stock) - Valuation fix: 4000 USD value / 170 price ~ 23.53 shares
-        accountService.createAccount(user.getId(), "STOCK", "AAPL");
-        Account aapl = accountRepository.findByUserId(user.getId()).stream().filter(a -> a.getCurrencyCode().equals("AAPL")).findFirst().get();
+        // AAPL
+        Account aapl = findAccountByCurrency(accounts, "AAPL");
         aapl.setBalance(BONUS_AAPL); 
         accountRepository.save(aapl);
         saveInitialDeposit(aapl, BONUS_AAPL);
+    }
+
+    private Account findAccountByCurrency(java.util.List<Account> accounts, String currency) {
+        return accounts.stream()
+                .filter(a -> a.getCurrencyCode().toUpperCase(java.util.Locale.ROOT).equals(currency))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Account not found for currency: " + currency));
     }
 
     private void saveInitialDeposit(Account account, BigDecimal amount) {

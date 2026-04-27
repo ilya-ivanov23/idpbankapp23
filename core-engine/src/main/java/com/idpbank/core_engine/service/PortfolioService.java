@@ -49,9 +49,10 @@ public class PortfolioService {
         allocation.put("TOTAL_USD_VALUE", totalUsd);
 
         if (totalUsd.compareTo(BigDecimal.ZERO) == 0) {
-            allocation.put("FIAT_PERCENT", 0);
-            allocation.put("CRYPTO_PERCENT", 0);
-            allocation.put("STOCK_PERCENT", 0);
+            BigDecimal zero = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+            allocation.put("FIAT_PERCENT", zero);
+            allocation.put("CRYPTO_PERCENT", zero);
+            allocation.put("STOCK_PERCENT", zero);
         } else {
             allocation.put("FIAT_PERCENT", totalFiatUsd.multiply(ONE_HUNDRED).divide(totalUsd, 2, RoundingMode.HALF_UP));
             allocation.put("CRYPTO_PERCENT", totalCryptoUsd.multiply(ONE_HUNDRED).divide(totalUsd, 2, RoundingMode.HALF_UP));
@@ -65,7 +66,7 @@ public class PortfolioService {
         if (currencyCode == null || balance == null) {
             return BigDecimal.ZERO;
         }
-        return switch (currencyCode.toUpperCase()) {
+        return switch (currencyCode.toUpperCase(java.util.Locale.ROOT)) {
             case "USD" -> balance;
             case "EUR" -> balance.multiply(EUR_RATE);
             case "PLN" -> balance.multiply(PLN_RATE);
