@@ -8,17 +8,9 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 
 
-import { useBalance } from './BalanceProvider';
-
 const DoughnutChart = ({ accounts }: DoughnutChartProps) => {
-    const { source } = useBalance();
-    
     const accountNames = accounts.map((a) => a.name);
-    const balances = accounts.map((a) => 
-        source === 'plaid' 
-            ? a.currentBalance 
-            : (a.manualBalance ?? a.currentBalance)
-    );
+    const balances = accounts.map((a) => a.currentBalance);
 
     const data = {
         datasets: [

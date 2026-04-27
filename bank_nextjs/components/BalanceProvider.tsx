@@ -1,8 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext } from "react";
 
-type BalanceSource = "plaid" | "appwrite";
+type BalanceSource = "api";
 
 interface BalanceContextType {
   source: BalanceSource;
@@ -13,24 +13,9 @@ interface BalanceContextType {
 const BalanceContext = createContext<BalanceContextType | undefined>(undefined);
 
 export const BalanceProvider = ({ children }: { children: React.ReactNode }) => {
-  const [source, setSourceState] = useState<BalanceSource>("plaid");
-
-  useEffect(() => {
-    // Optionally persist preference in localStorage
-    const savedSource = localStorage.getItem("balanceSource") as BalanceSource;
-    if (savedSource) {
-      setSourceState(savedSource);
-    }
-  }, []);
-
-  const setSource = (newSource: BalanceSource) => {
-    setSourceState(newSource);
-    localStorage.setItem("balanceSource", newSource);
-  }
-
-  const toggleSource = () => {
-    setSource(source === "plaid" ? "appwrite" : "plaid");
-  };
+  const source: BalanceSource = "api";
+  const setSource = () => {};
+  const toggleSource = () => {};
 
   return (
     <BalanceContext.Provider value={{ source, toggleSource, setSource }}>

@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/select";
 import { formUrlQuery, formatAmount } from "@/lib/utils";
 
-import { useBalance } from './BalanceProvider';
 
 export const BankDropdown = ({
                                  accounts = [],
@@ -25,7 +24,6 @@ export const BankDropdown = ({
     const searchParams = useSearchParams();
     const router = useRouter();
     const [selected, setSeclected] = useState(accounts[0]);
-    const { source } = useBalance();
 
     const handleBankChange = (id: string) => {
         const account = accounts.find((account) => account.appwriteItemId === id)!;
@@ -45,7 +43,7 @@ export const BankDropdown = ({
 
     return (
         <Select
-            defaultValue={selected.id}
+            defaultValue={selected?.appwriteItemId}
             onValueChange={(value) => handleBankChange(value)}
         >
             <SelectTrigger
@@ -59,11 +57,7 @@ export const BankDropdown = ({
                     alt="account"
                 />
                 <p className="line-clamp-1 w-full text-left">
-                    {selected.name} ({formatAmount(
-                        source === 'plaid' 
-                            ? selected.currentBalance 
-                            : (selected.manualBalance !== undefined ? selected.manualBalance : selected.currentBalance)
-                    )})
+                    {selected?.name} ({formatAmount(selected?.currentBalance ?? 0)})
                 </p>
             </SelectTrigger>
             <SelectContent
@@ -83,11 +77,7 @@ export const BankDropdown = ({
                             <div className="flex flex-col ">
                                 <p className="text-16 font-medium">{account.name}</p>
                                 <p className="text-14 font-medium text-blue-600">
-                                    {formatAmount(
-                                        source === 'plaid' 
-                                            ? account.currentBalance 
-                                            : (account.manualBalance !== undefined ? account.manualBalance : account.currentBalance)
-                                    )}
+                                    {formatAmount(account.currentBalance)}
                                 </p>
                             </div>
                         </SelectItem>

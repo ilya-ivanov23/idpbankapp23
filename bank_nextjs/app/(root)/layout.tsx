@@ -3,7 +3,7 @@ import Image from "next/image";
 import MobileNav from "@/components/MobileNav"; // Add this back
 import MobileProfile from "@/components/MobileProfile";
 import {getLoggedInUser} from "@/lib/actions/user.actions";
-import { getAccounts, getAccount } from "@/lib/actions/bank.actions";
+import { getAccounts } from "@/lib/actions/bank.actions";
 import {redirect} from "next/navigation";
 
 export default async function RootLayout({
@@ -17,11 +17,7 @@ export default async function RootLayout({
     
     const accounts = await getAccounts({ userId: loggedIn.$id });
     
-    let transactions = [];
-    if(accounts?.data?.length > 0) {
-        const account = await getAccount({ appwriteItemId: accounts.data[0].appwriteItemId });
-        transactions = account?.transactions || [];
-    }
+    const transactions: Transaction[] = [];
 
     return (
        <main className="flex h-screen w-full font-inter">

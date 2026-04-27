@@ -3,16 +3,10 @@
 import React from 'react'
 import AnimatedCounter from "@/components/AnimatedCounter";
 import DoughnutChart from "@/components/DoughnutChart";
-import { useBalance } from './BalanceProvider';
 
 const TotalBalanceBox = ({
     accounts = [], totalBanks, totalCurrentBalance
                          }: TotalBalanceBoxProps) => {
-    const { source } = useBalance();
-
-    const totalManualBalance = accounts.reduce((total, account) => {
-        return total + (account.manualBalance ?? account.currentBalance);
-    }, 0);
 
     return (
         <section className="total-balance">
@@ -26,11 +20,11 @@ const TotalBalanceBox = ({
                 </h2>
                 <div className="flex flex-col gap-2">
                     <p className="total-balance-label">
-                        {source === 'plaid' ? 'Total Current Balance' : 'Total Appwrite Balance'}
+                        Total Current Balance
                     </p>
 
                     <div className="total-balance-amount flex-center gap-2">
-                        <AnimatedCounter amount={source === 'plaid' ? totalCurrentBalance : totalManualBalance} />
+                        <AnimatedCounter amount={totalCurrentBalance} />
                     </div>
                 </div>
             </div>
