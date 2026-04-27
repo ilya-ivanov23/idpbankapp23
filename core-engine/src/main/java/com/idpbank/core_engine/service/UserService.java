@@ -110,49 +110,68 @@ public class UserService {
         userRepository.save(user);
     }
 
+    private static final BigDecimal BONUS_USD = new BigDecimal("3000.00");
+    private static final BigDecimal BONUS_PLN = new BigDecimal("5000.00");
+    private static final BigDecimal BONUS_EUR = new BigDecimal("2000.00");
+    private static final BigDecimal BONUS_BTC = new BigDecimal("1.0");
+    private static final BigDecimal BONUS_ETH = new BigDecimal("10.0");
+    private static final BigDecimal BONUS_AAPL = new BigDecimal("23.52941176");
+
     @Transactional
     protected void grantWelcomeBonus(User user) {
-        // USD
+        // Create accounts first
         accountService.createAccount(user.getId(), "FIAT", "USD");
-        Account usd = accountRepository.findByUserId(user.getId()).stream().filter(a -> a.getCurrencyCode().equals("USD")).findFirst().get();
-        usd.setBalance(new BigDecimal("3000.00"));
+        accountService.createAccount(user.getId(), "FIAT", "PLN");
+        accountService.createAccount(user.getId(), "FIAT", "EUR");
+        accountService.createAccount(user.getId(), "CRYPTO", "BTC");
+        accountService.createAccount(user.getId(), "CRYPTO", "ETH");
+        accountService.createAccount(user.getId(), "STOCK", "AAPL");
+
+        // Fetch all accounts once to avoid N+1 queries
+        java.util.List<Account> accounts = accountRepository.findByUserId(user.getId());
+
+        // USD
+        Account usd = findAccountByCurrency(accounts, "USD");
+        usd.setBalance(BONUS_USD);
         accountRepository.save(usd);
-        saveInitialDeposit(usd, new BigDecimal("3000.00"));
+        saveInitialDeposit(usd, BONUS_USD);
 
         // PLN
-        accountService.createAccount(user.getId(), "FIAT", "PLN");
-        Account pln = accountRepository.findByUserId(user.getId()).stream().filter(a -> a.getCurrencyCode().equals("PLN")).findFirst().get();
-        pln.setBalance(new BigDecimal("5000.00"));
+        Account pln = findAccountByCurrency(accounts, "PLN");
+        pln.setBalance(BONUS_PLN);
         accountRepository.save(pln);
-        saveInitialDeposit(pln, new BigDecimal("5000.00"));
+        saveInitialDeposit(pln, BONUS_PLN);
 
         // EUR
-        accountService.createAccount(user.getId(), "FIAT", "EUR");
-        Account eur = accountRepository.findByUserId(user.getId()).stream().filter(a -> a.getCurrencyCode().equals("EUR")).findFirst().get();
-        eur.setBalance(new BigDecimal("2000.00"));
+        Account eur = findAccountByCurrency(accounts, "EUR");
+        eur.setBalance(BONUS_EUR);
         accountRepository.save(eur);
-        saveInitialDeposit(eur, new BigDecimal("2000.00"));
+        saveInitialDeposit(eur, BONUS_EUR);
 
         // BTC
-        accountService.createAccount(user.getId(), "CRYPTO", "BTC");
-        Account btc = accountRepository.findByUserId(user.getId()).stream().filter(a -> a.getCurrencyCode().equals("BTC")).findFirst().get();
-        btc.setBalance(new BigDecimal("1.0"));
+        Account btc = findAccountByCurrency(accounts, "BTC");
+        btc.setBalance(BONUS_BTC);
         accountRepository.save(btc);
-        saveInitialDeposit(btc, new BigDecimal("1.0"));
+        saveInitialDeposit(btc, BONUS_BTC);
 
         // ETH
-        accountService.createAccount(user.getId(), "CRYPTO", "ETH");
-        Account eth = accountRepository.findByUserId(user.getId()).stream().filter(a -> a.getCurrencyCode().equals("ETH")).findFirst().get();
-        eth.setBalance(new BigDecimal("10.0"));
+        Account eth = findAccountByCurrency(accounts, "ETH");
+        eth.setBalance(BONUS_ETH);
         accountRepository.save(eth);
-        saveInitialDeposit(eth, new BigDecimal("10.0"));
+        saveInitialDeposit(eth, BONUS_ETH);
 
-        // AAPL (Stock) - Valuation fix: 4000 USD value / 170 price ~ 23.53 shares
-        accountService.createAccount(user.getId(), "STOCK", "AAPL");
-        Account aapl = accountRepository.findByUserId(user.getId()).stream().filter(a -> a.getCurrencyCode().equals("AAPL")).findFirst().get();
-        aapl.setBalance(new BigDecimal("23.52941176")); 
+        // AAPL
+        Account aapl = findAccountByCurrency(accounts, "AAPL");
+        aapl.setBalance(BONUS_AAPL); 
         accountRepository.save(aapl);
-        saveInitialDeposit(aapl, new BigDecimal("23.52941176"));
+        saveInitialDeposit(aapl, BONUS_AAPL);
+    }
+
+    private Account findAccountByCurrency(java.util.List<Account> accounts, String currency) {
+        return accounts.stream()
+                .filter(a -> a.getCurrencyCode().toUpperCase(java.util.Locale.ROOT).equals(currency))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Account not found for currency: " + currency));
     }
 
     private void saveInitialDeposit(Account account, BigDecimal amount) {
