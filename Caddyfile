@@ -1,0 +1,4 @@
+idpbank.app {
+    # Перенаправляем все запросы на наш Next.js
+    reverse_proxy bank_app:3000
+}

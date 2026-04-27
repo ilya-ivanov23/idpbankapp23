@@ -29,4 +29,5 @@ export const env = {
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET as string,
   RESEND_API_KEY: process.env.RESEND_API_KEY as string,
+  JAVA_CORE_URL: process.env.JAVA_CORE_URL as string,
 };

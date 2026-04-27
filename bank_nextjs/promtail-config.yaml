@@ -6,11 +6,7 @@ positions:
   filename: /tmp/positions.yaml
 
 clients:
-  # Credentials injected from .env via docker-compose configuration
-  - url: ${LOKI_URL}
-    basic_auth:
-      username: ${LOKI_USER}
-      password: ${LOKI_PASSWORD}
+  - url: http://bank_loki:3100/loki/api/v1/push
 
 scrape_configs:
   - job_name: docker

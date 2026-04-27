@@ -1,0 +1,185 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # 1. БАЗЫ ДАННЫХ И ОЧЕРЕДИ
+  # ==========================================
+  bank-postgres:
+    image: postgres:15
+    container_name: bank_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "127.0.0.1:5432:5432" # Защищено: только для SSH-туннеля
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bank-network
+
+  bank-redis:
+    image: redis:7-alpine
+    container_name: bank_redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379" # Защищено
+    volumes:
+      - redis_data:/data
+    networks:
+      - bank-network
+
+  bank-kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: bank_kafka
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9092:9092" # Защищено
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@bank-kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://bank-kafka:29092,PLAINTEXT_HOST://127.0.0.1:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_HEAP_OPTS: "-Xmx256M -Xms256M"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - bank-network
+
+  # ==========================================
+  # 2. ВХОДНОЙ ШЛЮЗ (Caddy HTTPS)
+  # ==========================================
+  caddy:
+    image: caddy:latest
+    container_name: bank_proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - bank-network
+
+  # ==========================================
+  # 3. МОНИТОРИНГ (Grafana, Loki, Alloy)
+  # ==========================================
+  loki:
+    image: grafana/loki:latest
+    container_name: bank_loki
+    ports:
+      - "127.0.0.1:3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: always
+    networks:
+      - bank-network
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: bank_promtail
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./promtail-config.yaml:/etc/promtail/config.yml:ro
+    command: -config.file=/etc/promtail/config.yml -config.expand-env=true
+    restart: always
+    networks:
+      - bank-network
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: bank_node_exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--collector.netdev.device-exclude=^(veth|br-|docker|lo).*'
+    restart: always
+    networks:
+      - bank-network
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: bank_alloy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./monitoring/alloy-config.alloy:/etc/alloy/config.alloy:ro
+    command: run /etc/alloy/config.alloy
+    env_file:
+      - .env
+    restart: always
+    networks:
+      - bank-network
+
+  bank-bff:
+    build:
+      context: ../idpbankapp23/bank-bff # Путь к коду из соседней папки
+      dockerfile: Dockerfile
+    container_name: bank_bff
+    restart: unless-stopped
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@bank-postgres:5432/${DB_NAME}
+      - REDIS_URL=redis://bank-redis:6379
+      - KAFKA_BROKERS=bank-kafka:29092
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JAVA_CORE_URL=http://bank-core:8080
+    networks:
+      - bank-network
+    depends_on:
+      - bank-postgres
+      - bank-redis
+      - bank-kafka
+      - bank-core
+
+  bank-core:
+    build:
+      context: ../idpbankapp23/core-engine
+      dockerfile: Dockerfile
+    container_name: bank_core
+    restart: unless-stopped
+    environment:
+      # Активируем docker-профиль (читает application-docker.properties)
+      - SPRING_PROFILES_ACTIVE=docker
+      # Секреты БД
+      - DATABASE_URL=jdbc:postgresql://bank-postgres:5432/${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      # Kafka внутри docker-сети
+      - KAFKA_BROKERS=bank-kafka:29092
+    networks:
+      - bank-network
+    depends_on:
+      - bank-postgres
+      - bank-kafka
+
+volumes:
+  postgres_data:
+  redis_data:
+  kafka_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  bank-network:
+    driver: bridge

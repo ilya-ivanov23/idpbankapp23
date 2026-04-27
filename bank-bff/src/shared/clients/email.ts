@@ -6,7 +6,7 @@ export const resendClient = new Resend(env.RESEND_API_KEY);
 export const sendOtpEmail = async (to: string, otp: string) => {
   try {
     const data = await resendClient.emails.send({
-      from: 'IDPBank Security <onboarding@resend.dev>', // Use onboarding@resend.dev for testing unless domain is verified
+      from: 'IDPBank Security <auth@idpbank.app>', // Use onboarding@resend.dev for testing unless domain is verified
       to: to,
       subject: 'Your Verification Code',
       html: `

@@ -1,9 +1,9 @@
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { producer } from '../../shared/clients/kafka';
 
 export class TransactionService {
   async publishTransferEvent(userId: string, toAccount: string, amount: number, currency: string) {
-    const eventId = uuidv4();
+    const eventId = crypto.randomUUID();
 
     // Build the event payload for the Core microservice
     const payload = {

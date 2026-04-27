@@ -1,0 +1,39 @@
+{
+    email wertytir666@gmail.com
+}
+
+api.idpbank.app {
+    # Проксирование на наш Node.js BFF
+    reverse_proxy bank-bff:3000
+
+    # Настройки безопасности (Headers)
+    header {
+        # Разрешаем фронтенду доступ (убедись, что домен совпадает)
+        Access-Control-Allow-Origin https://idpbank.app
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+        Access-Control-Allow-Credentials true
+        
+        # Защита от кликджекинга и XSS
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+
+    # Обработка предзапросов OPTIONS (Preflight), чтобы браузер не блокировал запросы
+    @options {
+        method OPTIONS
+    }
+    handle @options {
+        header Access-Control-Allow-Origin https://idpbank.app
+        header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        header Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+        header Access-Control-Max-Age "3600"
+        respond "" 204
+    }
+
+    # Логирование запросов (полезно для отладки Stripe Webhooks)
+    log {
+        output file /var/log/caddy/api_access.log
+    }
+}

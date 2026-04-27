@@ -46,7 +46,7 @@ export class AuthController {
 
       // Send OTP via email
       await resend.emails.send({
-        from: 'onboarding@resend.dev', // Use a verified sender in production
+        from: 'auth@idpbank.app', 
         to: email,
         subject: 'IDPBank OTP Verification',
         html: `<p>Your verification code is: <strong>${otp}</strong></p>`
