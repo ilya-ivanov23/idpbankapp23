@@ -1,45 +1,55 @@
 import { Request, Response, NextFunction } from 'express';
 import { redisClient } from '../clients/redis';
+import axios from 'axios';
+import bcrypt from 'bcrypt';
+import { config } from '../../config/env';
 
-/**
- * Security Guard:
- * - Demands OTP if the transaction amount is > 3000
- * - In real implementation, the frontend would pass OTP in headers (e.g., 'X-OTP-Code')
- * - We verify it here.
- * - PIN validation would typically be done by calling the core-engine or comparing a hash.
- */
 export const securityGuard = async (req: Request, res: Response, next: NextFunction) => {
-  const amount = Number(req.body.amount || 0);
+  try {
+    const amount = Number(req.body.amount || 0);
+    const userEmail = req.user?.email;
 
-  // Example: Check PIN if operation requires money
-  // Assume PIN is sent in 'X-PIN-Code' header
-  const pinCode = req.headers['x-pin-code'];
-  if (amount > 0 && !pinCode) {
-    return res.status(403).json({ error: 'PIN Code required for this operation' });
-  }
-
-  // Example: Check OTP if amount > $3000
-  if (amount > 3000) {
-    const otpCode = req.headers['x-otp-code'] as string;
-    if (!otpCode) {
-      return res.status(403).json({ error: 'OTP required for transactions over $3000. Please request an OTP and provide it in X-OTP-Code header.' });
-    }
-
-    const userId = req.user?.userId;
-    if (!userId) {
+    if (!userEmail) {
       return res.status(401).json({ error: 'Unauthorized user' });
     }
 
-    const otpKey = `otp:${userId}`;
-    const storedOtp = await redisClient.get(otpKey);
+    if (amount > 3000) {
+      const otpCode = req.headers['x-otp-code'] as string;
+      if (!otpCode) {
+        return res.status(403).json({ error: 'OTP required for transactions over $3000. Please provide in x-otp-code header.' });
+      }
 
-    if (!storedOtp || storedOtp !== otpCode) {
-      return res.status(401).json({ error: 'Invalid or expired OTP' });
+      const otpKey = `otp:${userEmail}`;
+      const storedOtp = await redisClient.get(otpKey);
+
+      if (!storedOtp || storedOtp !== otpCode) {
+        return res.status(403).json({ error: 'Invalid or expired OTP' });
+      }
+
+      // OTP matched, consume it
+      await redisClient.del(otpKey);
+    } else if (amount > 0 && amount <= 3000) {
+      const pinCode = req.headers['x-pin'] as string;
+      if (!pinCode) {
+        return res.status(403).json({ error: 'PIN Code required for this operation. Please provide in x-pin header.' });
+      }
+
+      const javaResponse = await axios.get(`${config.javaCoreUrl}/api/internal/users/pin?email=${userEmail}`);
+      const pinHash = javaResponse.data.pinHash;
+
+      if (!pinHash) {
+        return res.status(403).json({ error: 'User PIN not set' });
+      }
+
+      const isPinValid = await bcrypt.compare(pinCode, pinHash);
+      if (!isPinValid) {
+        return res.status(403).json({ error: 'Invalid PIN Code' });
+      }
     }
 
-    // OTP matched, consume it
-    await redisClient.del(otpKey);
+    next();
+  } catch (error) {
+    console.error('Security Guard Error:', error);
+    return res.status(500).json({ error: 'Internal server error during security check' });
   }
-
-  next();
 };

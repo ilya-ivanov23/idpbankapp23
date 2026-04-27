@@ -13,4 +13,12 @@ public class UserResponseDto {
     private boolean isVerified;
     private BigDecimal dailyLimit;
     private LocalDateTime createdAt;
+    private String firstName;
+    private String lastName;
+    private java.time.LocalDate dateOfBirth;
+    private String address;
+    private String city;
+    private String postalCode;
+    private String language;
+    private boolean pushEnabled;
 }

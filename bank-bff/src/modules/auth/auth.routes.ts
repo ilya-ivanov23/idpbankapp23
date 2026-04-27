@@ -5,10 +5,9 @@ import { authGuard } from '../../shared/middleware/auth.middleware';
 const router = Router();
 const authController = new AuthController();
 
-router.post('/login', authController.login);
-router.post('/logout', authGuard, authController.logout);
-router.post('/send-otp', authController.requestOtp);
+router.post('/register', authController.register);
 router.post('/verify-otp', authController.verifyOtp);
+router.post('/set-pin', authController.setPin);
+router.post('/stripe-connection', authController.createStripeConnection);
 
 export default router;
-

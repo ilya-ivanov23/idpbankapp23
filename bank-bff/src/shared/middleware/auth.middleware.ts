@@ -5,6 +5,7 @@ import { redisClient } from '../clients/redis';
 
 export interface DecodedAuthToken {
   userId: string;
+  email: string;
   deviceId: string;
   jti: string;
   iat?: number;

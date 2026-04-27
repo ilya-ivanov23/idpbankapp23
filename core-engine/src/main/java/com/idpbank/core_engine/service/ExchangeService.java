@@ -23,69 +23,78 @@ public class ExchangeService {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
+    private final AccountService accountService;
 
     @Transactional
-    public void executeExchange(ExchangeRequestDto request) {
-        log.info("Starting exchange: {} from {} to {} with rate {}", 
-                request.getAmountToDebit(), request.getFromAccountId(), request.getToAccountId(), request.getExchangeRate());
+    public void executeExchange(UUID userId, String fromCurrency, String toCurrency, BigDecimal amount, BigDecimal rate) {
+        log.info("Starting exchange for user: {} from {} to {} with rate {}", userId, fromCurrency, toCurrency, rate);
 
-        // Idempotency check
-        if (transactionRepository.existsByIdempotencyKey(request.getIdempotencyKey())) {
-            log.warn("Exchange {} already processed", request.getIdempotencyKey());
-            return;
+        if (fromCurrency.equals(toCurrency)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot exchange within the same currency");
         }
-
-        if (request.getFromAccountId() == null || request.getToAccountId() == null || request.getExchangeRate() == null || request.getAmountToDebit() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required fields for exchange");
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must be positive");
         }
-        if (request.getFromAccountId().equals(request.getToAccountId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot exchange within the same account");
-        }
-        if (request.getAmountToDebit().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount to debit must be positive");
-        }
-        if (request.getExchangeRate().compareTo(BigDecimal.ZERO) <= 0) {
+        if (rate.compareTo(BigDecimal.ZERO) <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exchange rate must be positive");
         }
 
-        // Always lock in a consistent order to prevent deadlocks (e.g. by UUID)
-        UUID firstLock = request.getFromAccountId().compareTo(request.getToAccountId()) < 0 ? request.getFromAccountId() : request.getToAccountId();
-        UUID secondLock = request.getFromAccountId().compareTo(request.getToAccountId()) < 0 ? request.getToAccountId() : request.getFromAccountId();
+        // Find accounts
+        Account fromAccount = accountRepository.findByUserId(userId).stream()
+                .filter(a -> a.getCurrencyCode().equals(fromCurrency))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Source account not found"));
 
-        Account firstAccount = accountRepository.findByIdForUpdate(firstLock)
-                .orElseThrow(() -> new IllegalArgumentException("Account not found: " + firstLock));
-        Account secondAccount = accountRepository.findByIdForUpdate(secondLock)
-                .orElseThrow(() -> new IllegalArgumentException("Account not found: " + secondLock));
+        Account toAccount = accountRepository.findByUserId(userId).stream()
+                .filter(a -> a.getCurrencyCode().equals(toCurrency))
+                .findFirst()
+                .orElseGet(() -> {
+                    String assetType = determineAssetType(toCurrency);
+                    return accountRepository.findById(accountService.createAccount(userId, assetType, toCurrency).getId())
+                        .orElseThrow(() -> new IllegalStateException("Failed to create account"));
+                });
 
-        Account fromAccount = firstAccount.getId().equals(request.getFromAccountId()) ? firstAccount : secondAccount;
-        Account toAccount = firstAccount.getId().equals(request.getToAccountId()) ? firstAccount : secondAccount;
+        // Always lock in a consistent order to prevent deadlocks
+        UUID firstLock = fromAccount.getId().compareTo(toAccount.getId()) < 0 ? fromAccount.getId() : toAccount.getId();
+        UUID secondLock = fromAccount.getId().compareTo(toAccount.getId()) < 0 ? toAccount.getId() : fromAccount.getId();
 
-        // Verify balance
-        if (fromAccount.getBalance().compareTo(request.getAmountToDebit()) < 0) {
+        accountRepository.findByIdForUpdate(firstLock);
+        accountRepository.findByIdForUpdate(secondLock);
+
+        // Re-fetch to get locked entity state
+        fromAccount = accountRepository.findById(fromAccount.getId()).orElseThrow();
+        toAccount = accountRepository.findById(toAccount.getId()).orElseThrow();
+
+        if (fromAccount.getBalance().compareTo(amount) < 0) {
             throw new IllegalStateException("Insufficient funds for exchange");
         }
 
-        // Calculate credited amount (Amount * Rate)
-        BigDecimal amountToCredit = request.getAmountToDebit().multiply(request.getExchangeRate())
-                .setScale(8, RoundingMode.HALF_UP); // 8 decimal places for crypto
+        BigDecimal amountToCredit = amount.multiply(rate).setScale(8, RoundingMode.HALF_UP);
 
-        // Execute exchange
-        fromAccount.setBalance(fromAccount.getBalance().subtract(request.getAmountToDebit()));
+        fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
         toAccount.setBalance(toAccount.getBalance().add(amountToCredit));
 
         accountRepository.save(fromAccount);
         accountRepository.save(toAccount);
 
-        // Record transaction
         Transaction tx = new Transaction();
         tx.setFromAccount(fromAccount);
         tx.setToAccount(toAccount);
-        tx.setAmount(request.getAmountToDebit()); // Saving the debited amount
+        tx.setAmount(amount);
+        tx.setCurrencyRate(rate);
         tx.setType("EXCHANGE");
         tx.setStatus("COMPLETED");
-        tx.setIdempotencyKey(request.getIdempotencyKey());
+        tx.setIdempotencyKey(UUID.randomUUID().toString());
 
         transactionRepository.save(tx);
         log.info("Exchange completed successfully");
+    }
+
+    private String determineAssetType(String currency) {
+        return switch (currency.toUpperCase()) {
+            case "BTC", "ETH" -> "CRYPTO";
+            case "AAPL" -> "STOCK";
+            default -> "FIAT";
+        };
     }
 }
