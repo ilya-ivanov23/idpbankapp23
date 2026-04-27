@@ -30,4 +30,10 @@ export const env = {
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET as string,
   RESEND_API_KEY: process.env.RESEND_API_KEY as string,
   JAVA_CORE_URL: process.env.JAVA_CORE_URL as string,
+  javaCoreUrl: process.env.JAVA_CORE_URL as string,
+  jwtSecret: process.env.JWT_SECRET as string,
 };
+
+export const config = env;
+
+

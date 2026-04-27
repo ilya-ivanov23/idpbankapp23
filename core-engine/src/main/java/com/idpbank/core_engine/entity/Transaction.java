@@ -29,7 +29,11 @@ public class Transaction {
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
+    @Column(name = "currency_rate")
+    private BigDecimal currencyRate;
+
     @Column(name = "type", nullable = false)
+
     private String type = "TRANSFER";
 
     @Column(name = "status", nullable = false)

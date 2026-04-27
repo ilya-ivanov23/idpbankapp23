@@ -34,7 +34,7 @@ export const securityGuard = async (req: Request, res: Response, next: NextFunct
         return res.status(403).json({ error: 'PIN Code required for this operation. Please provide in x-pin header.' });
       }
 
-      const javaResponse = await axios.get(`${config.javaCoreUrl}/api/internal/users/pin?email=${userEmail}`);
+      const javaResponse = await axios.get(`${config.javaCoreUrl}/api/internal/users/pin?email=${encodeURIComponent(userEmail)}`);
       const pinHash = javaResponse.data.pinHash;
 
       if (!pinHash) {

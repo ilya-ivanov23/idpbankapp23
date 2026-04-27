@@ -18,12 +18,6 @@ export class AuthController {
         return res.status(400).json({ error: 'Missing email or password' });
       }
 
-      // Create Stripe Customer
-      const customer = await stripe.customers.create({
-        email,
-        name: `${firstName || ''} ${lastName || ''}`.trim()
-      });
-
       const userData = {
         email,
         passwordHash: await bcrypt.hash(password, 10),
@@ -33,8 +27,7 @@ export class AuthController {
         address,
         city,
         postalCode,
-        language: language || 'en',
-        stripeCustomerId: customer.id
+        language: language || 'en'
       };
 
       // Save to Redis for 10 minutes (600s)
@@ -59,6 +52,28 @@ export class AuthController {
     }
   }
 
+  async sendOtp(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ error: 'Email required' });
+
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      await redisClient.setEx(`otp:${email}`, 300, otp);
+
+      await resend.emails.send({
+        from: 'auth@idpbank.app',
+        to: email,
+        subject: 'IDPBank OTP Code',
+        html: `<p>Your secure code is: <strong>${otp}</strong></p>`
+      });
+
+      return res.status(200).json({ message: 'OTP sent' });
+    } catch (error) {
+      console.error('Send OTP error', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+
   async verifyOtp(req: Request, res: Response) {
     try {
       const { email, otp } = req.body;
@@ -79,6 +94,13 @@ export class AuthController {
 
       const userData = JSON.parse(tempUserStr);
 
+      // Create Stripe Customer only after OTP verification
+      const customer = await stripe.customers.create({
+        email: userData.email,
+        name: `${userData.firstName || ''} ${userData.lastName || ''}`.trim()
+      });
+      userData.stripeCustomerId = customer.id;
+
       // Call Java Core to create user and grant welcome bonus
       const coreResponse = await axios.post(`${config.javaCoreUrl}/api/internal/users`, userData);
       
@@ -86,11 +108,11 @@ export class AuthController {
       await redisClient.del(`otp:${email}`);
       await redisClient.del(`temp_user:${email}`);
 
-      // Generate JWTs
+      // Generate JWTs with unique JTI for revocation tracking
       const userId = coreResponse.data.id;
       const deviceId = uuidv4();
-      const accessToken = jwt.sign({ userId, email, deviceId }, config.jwtSecret, { expiresIn: '15m' });
-      const refreshToken = jwt.sign({ userId, email, deviceId }, config.jwtSecret, { expiresIn: '7d' });
+      const accessToken = jwt.sign({ userId, email, deviceId }, config.jwtSecret, { expiresIn: '15m', jwtid: uuidv4() });
+      const refreshToken = jwt.sign({ userId, email, deviceId }, config.jwtSecret, { expiresIn: '7d', jwtid: uuidv4() });
 
       return res.status(200).json({
         message: 'OTP verified, user created successfully',
