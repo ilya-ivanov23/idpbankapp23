@@ -47,7 +47,6 @@ export default function RootLayout({
           {children}
         </BalanceProvider>
         </ThemeProvider>
-        <Script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js" strategy="beforeInteractive" />
       </body>
       </html>
   );

@@ -5,14 +5,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import Copy from './Copy'
-import { useBalance } from './BalanceProvider';
 
 const BankCard = ({ account, userName, showBalance = true }: CreditCardProps) => {
-    const { source } = useBalance();
-    
-    const balance = source === 'plaid' 
-        ? account.currentBalance 
-        : (account.manualBalance !== undefined ? account.manualBalance : account.currentBalance);
+    const balance = account.currentBalance;
 
     return (
         <div className="flex flex-col">

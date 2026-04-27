@@ -10,12 +10,10 @@ import {
     getAccountTypeColors,
 } from "@/lib/utils";
 
-import { useBalance } from './BalanceProvider';
 
 const BankInfo = ({ account, appwriteItemId, type }: BankInfoProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { source } = useBalance();
 
     const isActive = appwriteItemId === account?.appwriteItemId;
 
@@ -30,9 +28,7 @@ const BankInfo = ({ account, appwriteItemId, type }: BankInfoProps) => {
 
     const colors = getAccountTypeColors(account?.type as AccountTypes);
 
-    const balance = source === 'plaid' 
-        ? account.currentBalance 
-        : (account.manualBalance !== undefined ? account.manualBalance : account.currentBalance);
+    const balance = account.currentBalance;
 
     return (
         <div

@@ -12,7 +12,6 @@ import React from "react";
 import BankCard from "./BankCard";
 import Category from "./Category";
 import { countTransactionCategories, cn } from "@/lib/utils";
-import PlaidLink from "@/components/PlaidLink";
 
 interface MobileProfileProps {
   user: any;
@@ -55,7 +54,7 @@ const MobileProfile = ({ user, banks = [], transactions = [] }: MobileProfilePro
           <div className="banks mt-10">
             <div className="flex w-full justify-between  items-center">
                 <h2 className="header-2">My Banks</h2>
-                <PlaidLink user={user} variant="mini" />
+
             </div>
              <div className="relative flex flex-1 flex-col items-center justify-center gap-7 mt-5">
                  {banks.length > 0 ? (

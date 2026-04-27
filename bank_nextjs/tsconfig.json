@@ -35,10 +35,11 @@
     "**/*.tsx",
     "next-env.d.ts",
     "tailwind.config.ts",
-    "bank_nextjs/.next/types/**/*.ts"
+    "bank_nextjs/.next/types/**/*.ts",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
-    "bank_nextjs/node_modules",
+    "node_modules",
     "postcss.config.mjs",
     "tailwind.config.ts"
   ]

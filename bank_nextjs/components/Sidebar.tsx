@@ -6,13 +6,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Footer from './Footer'
-import PlaidLink from './PlaidLink'
-import { useBalance } from './BalanceProvider';
 import { ModeToggle } from "@/components/ModeToggle";
 
 const Sidebar = ({ user }: SiderbarProps) => {
     const pathname = usePathname();
-    const { source, toggleSource } = useBalance();
 
     return (
         <section className="sidebar">
@@ -52,18 +49,11 @@ const Sidebar = ({ user }: SiderbarProps) => {
                     )
                 })}
 
-                <PlaidLink user={user} />
+
             </nav>
-<div    className="flex flex-col gap-2">
+            <div    className="flex flex-col gap-2">
             <Footer user={user} />
-            
-                <div className="flex flex-row  items-center justify-center py-2 gap-1 cursor-pointer" onClick={toggleSource}>
-                    <div className={`size-2.5 rounded-full ${source === 'plaid' ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className="text-[15px] font-semibold text-gray-600">
-                        {source === 'plaid' ? 'Plaid Mode' : 'Appwrite Mode'}
-                    </span>
-            </div>
-            
+
                 <ModeToggle />
                   </div>  
         </section>
