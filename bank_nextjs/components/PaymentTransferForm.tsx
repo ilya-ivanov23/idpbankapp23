@@ -7,8 +7,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { decryptId } from "@/lib/utils";
-
+import { createTransaction } from "@/lib/actions/transaction.actions";
 import { BankDropdown } from "./BankDropdown";
 import { Button } from "./ui/button";
 import {
@@ -52,7 +51,15 @@ const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
         setIsLoading(true);
 
         try {
-            // Mock transfer action to let the app compile while backend transfers are being updated
+            await createTransaction({
+                name: data.name,
+                amount: data.amount,
+                senderId: accounts[0]?.userId || "",
+                senderBankId: data.senderBank,
+                receiverId: data.sharableId,
+                receiverBankId: data.sharableId,
+                email: data.email,
+            });
             setIsSuccess(true);
             form.reset();
             setTimeout(() => router.push("/"), 3000);

@@ -3,6 +3,7 @@ import HeaderBox from '@/components/HeaderBox'
 import { Pagination } from '@/components/Pagination';
 import TransactionsTable from '@/components/TransactionsTable';
 import { getAccounts } from '@/lib/actions/bank.actions';
+import { getTransactionsByBankId } from '@/lib/actions/transaction.actions';
 import { getLoggedInUser } from '@/lib/actions/user.actions';
 import { formatAmount } from '@/lib/utils';
 import React from 'react'
@@ -25,7 +26,8 @@ const TransactionHistory = async ({ searchParams: { id, page } }: SearchParamPro
     const appwriteItemId = (id as string) || accountsData[0]?.appwriteItemId;
 
     const account = accountsData.find((item: Account) => item.appwriteItemId === appwriteItemId) || accountsData[0];
-    const transactions: Transaction[] = [];
+    const transactionsData = await getTransactionsByBankId({ bankId: account?.id || '' });
+    const transactions: Transaction[] = transactionsData?.transactions || [];
 
 
     const rowsPerPage = 10;

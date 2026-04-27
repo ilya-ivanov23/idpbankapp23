@@ -54,15 +54,12 @@ const AuthForm = ({ type }: { type: string }) => {
                     password: data.password
                 }
 
-                // Temporary logic: the backend wiring will be done next
-                // Simulate an API call delay
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                console.log("Mock registration payload:", userData);
-                setOtpSent(true); 
-                
-                // When you're ready to plug the real backend:
-                // const newUser = await signUp(userData);
-                // if (newUser?.error) setErrorMessage(newUser.error); else setOtpSent(true);
+                const newUser = await signUp(userData);
+                if (newUser?.error) {
+                    setErrorMessage(newUser.error);
+                } else {
+                    setOtpSent(true);
+                }
             }
 
             if (type === 'sign-in') {
@@ -158,12 +155,14 @@ const AuthForm = ({ type }: { type: string }) => {
                                 if (fullOtp.length === 6) {
                                     setIsLoading(true);
                                     try {
-                                        // TODO: Hook up backend OTP verification
-                                        // await verifyOtp(form.getValues().email, fullOtp);
-                                        await new Promise(resolve => setTimeout(resolve, 1000));
-                                        router.push('/');
-                                    } catch(e) {
-                                        setErrorMessage("Invalid code. Please try again.");
+                                        const res = await verifyOtp(form.getValues().email, fullOtp);
+                                        if (res?.error) {
+                                            setErrorMessage(res.error);
+                                        } else {
+                                            router.push('/');
+                                        }
+                                    } catch(e: any) {
+                                        setErrorMessage(e?.message || "Invalid code. Please try again.");
                                     } finally {
                                         setIsLoading(false);
                                     }

@@ -2,12 +2,15 @@
 import { apiClient } from '../apiClient';
 import { cookies } from 'next/headers';
 import { jwtDecode } from 'jwt-decode';
-import { revalidatePath } from 'next/cache';
 
 export const signIn = async ({ email, password }: signInProps) => {
-  const res = await apiClient.post('/api/auth/login', { username: email, password, deviceId: "web" });
-  cookies().set('accessToken', res.data.accessToken, { httpOnly: true, secure: true });
-  return res.data;
+  try {
+    const res = await apiClient.post('/api/auth/login', { username: email, password, deviceId: "web" });
+    cookies().set('accessToken', res.data.accessToken, { httpOnly: true, secure: true });
+    return res.data;
+  } catch (error: any) {
+    return { error: error?.response?.data?.message || error.message || "Sign in failed" };
+  }
 }
 
 export const signUp = async (userData: SignUpParams) => {
@@ -34,7 +37,7 @@ export const getLoggedInUser = async () => {
     const token = cookies().get('accessToken')?.value;
     if (!token) return null;
     const decoded: any = jwtDecode(token);
-    const res = await apiClient.get(`/api/internal/users?email=${decoded.sub}`);
+    const res = await apiClient.get(`/api/internal/users?email=${encodeURIComponent(decoded.sub)}`);
     const data = res.data;
     return { $id: data.id, firstName: data.firstName, lastName: data.lastName, email: data.email };
   } catch (error) {

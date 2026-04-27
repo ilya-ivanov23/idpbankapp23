@@ -5,6 +5,8 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
   try {
     const res = await apiClient.get(`/api/internal/accounts/${userId}`);
     const mappedAccounts = res.data.map((acc: any) => ({
+      id: acc.id,
+      institutionId: acc.institutionId || '',
       appwriteItemId: acc.id,
       accountId: acc.id,
       availableBalance: acc.balance,

@@ -35,7 +35,6 @@
     "**/*.tsx",
     "next-env.d.ts",
     "tailwind.config.ts",
-    "bank_nextjs/.next/types/**/*.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": [

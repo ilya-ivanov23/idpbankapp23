@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 /**
