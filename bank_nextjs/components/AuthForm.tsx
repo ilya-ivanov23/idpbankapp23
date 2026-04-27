@@ -174,7 +174,7 @@ const AuthForm = ({ type }: { type: string }) => {
                             {isLoading ? <Loader2 size={20} className="animate-spin" /> : "Verify Code"}
                         </Button>
                         <p className="text-center text-15 text-gray-500">
-                            Didn't receive the code? <span className="text-[#7C5DFA] font-semibold cursor-pointer hover:underline">Resend in 00:59</span>
+                            Didn&apos;t receive the code? <span className="text-[#7C5DFA] font-semibold cursor-pointer hover:underline">Resend in 00:59</span>
                         </p>
                     </div>
                 ) : (
